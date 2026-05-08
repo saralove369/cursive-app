@@ -1,0 +1,219 @@
+{
+  "theme": "LIGHT",
+  "archetype": "Archetype 1: Organic & Earthy (Customized with Jewel & Luxury tactile feel for an Ivory 'Luxury Reading Room' aesthetic)",
+  "brand_identity": {
+    "name": "Cursive",
+    "description": "A cognitive wellness and analog creativity platform for adults to restore focus and memory through cursive handwriting.",
+    "emotional_goal": "A sanctuary for thoughtful people reclaiming focus, memory, creativity, and analog presence through handwriting.",
+    "vibe": "Cinematic, literary, tactile, emotionally intelligent, slow, calming, premium."
+  },
+  "typography": {
+    "guidelines": "Import via expo-font. Never use system default sans-serif for headings. The typographic voice is strictly elegant, literary, and vintage.",
+    "fonts": {
+      "heading": "Playfair Display",
+      "body": "EB Garamond",
+      "accent": "Crimson Text"
+    },
+    "hierarchy": {
+      "h1": {
+        "fontFamily": "Playfair Display",
+        "fontSize": 40,
+        "lineHeight": 48,
+        "letterSpacing": -0.5
+      },
+      "h2": {
+        "fontFamily": "Playfair Display",
+        "fontSize": 32,
+        "lineHeight": 40,
+        "letterSpacing": -0.5
+      },
+      "h3": {
+        "fontFamily": "Playfair Display",
+        "fontSize": 24,
+        "lineHeight": 32,
+        "letterSpacing": 0
+      },
+      "body": {
+        "fontFamily": "EB Garamond",
+        "fontSize": 18,
+        "lineHeight": 28,
+        "letterSpacing": 0.2
+      },
+      "caption": {
+        "fontFamily": "Crimson Text",
+        "fontSize": 14,
+        "lineHeight": 20,
+        "letterSpacing": 0.5,
+        "textTransform": "uppercase"
+      }
+    }
+  },
+  "colors": {
+    "guidelines": "Avoid any bright, neon, or pure white/black colors. The palette relies strictly on warm ivory paper textures, charcoal inks, and muted gold accents.",
+    "background": {
+      "primary": "#F5F1E8",
+      "secondary": "#EBE5D9",
+      "paper": "#F9F6F0"
+    },
+    "text": {
+      "primary": "#2C2C2C",
+      "secondary": "#5C5C5C",
+      "muted": "#8A8A8A"
+    },
+    "accent": {
+      "gold": "#C9A961",
+      "goldHover": "#B39552",
+      "ink": "#1A1A1A",
+      "burgundyMuted": "#6B4C4C"
+    },
+    "border": {
+      "default": "#E2DCD0",
+      "light": "#EFEBE1"
+    }
+  },
+  "spacing": {
+    "guidelines": "Generous whitespace is critical for the 'uncluttered sanctuary' feel. Elements must have room to breathe.",
+    "xs": 4,
+    "sm": 8,
+    "md": 16,
+    "lg": 24,
+    "xl": 32,
+    "xxl": 48,
+    "xxxl": 64
+  },
+  "layout": {
+    "container": {
+      "paddingHorizontal": 24
+    },
+    "borderRadius": {
+      "sm": 4,
+      "md": 8,
+      "lg": 12,
+      "xl": 16
+    },
+    "shadows": {
+      "soft": {
+        "shadowColor": "#1A1A1A",
+        "shadowOffset": {
+          "width": 0,
+          "height": 4
+        },
+        "shadowOpacity": 0.04,
+        "shadowRadius": 12,
+        "elevation": 2
+      }
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": {
+        "backgroundColor": "#C9A961",
+        "borderRadius": 8,
+        "paddingVertical": 16,
+        "paddingHorizontal": 32,
+        "alignItems": "center",
+        "justifyContent": "center"
+      },
+      "secondary": {
+        "backgroundColor": "transparent",
+        "borderColor": "#C9A961",
+        "borderWidth": 1,
+        "borderRadius": 8,
+        "paddingVertical": 16,
+        "paddingHorizontal": 32,
+        "alignItems": "center",
+        "justifyContent": "center"
+      },
+      "ghost": {
+        "backgroundColor": "transparent",
+        "paddingVertical": 12,
+        "paddingHorizontal": 24,
+        "alignItems": "center",
+        "justifyContent": "center"
+      }
+    },
+    "cards": {
+      "collection": {
+        "backgroundColor": "#F9F6F0",
+        "borderRadius": 12,
+        "borderWidth": 1,
+        "borderColor": "#E2DCD0",
+        "padding": 24
+      }
+    },
+    "input": {
+      "paper_style": {
+        "borderBottomWidth": 1,
+        "borderColor": "#E2DCD0",
+        "paddingVertical": 12,
+        "fontFamily": "EB Garamond",
+        "fontSize": 18,
+        "color": "#2C2C2C"
+      }
+    },
+    "navigation_tabs": {
+      "backgroundColor": "#F5F1E8",
+      "borderTopWidth": 1,
+      "borderColor": "#E2DCD0",
+      "paddingTop": 12,
+      "paddingBottom": 24
+    }
+  },
+  "motion_and_interactions": {
+    "transitions": "Cinematic, slightly-slower-than-normal (e.g., 400ms-600ms ease-in-out). Fade and gentle slide. Avoid bouncy springs.",
+    "haptics": "Subtle micro-haptics on successful tracing (impactLight), gentle tactile pulses during screen transitions.",
+    "animations": "Use ambient motion sparingly. Calm shimmer for loading states. Realistic ink rendering/drawing animations using Skia."
+  },
+  "icons": {
+    "library": "lucide-react-native",
+    "usage": "Use icons sparingly. Pair with text where possible. NO emojis.",
+    "mapping": {
+      "Studio": "PenTool",
+      "Collections": "Library",
+      "Archive": "Archive",
+      "Progress": "Compass",
+      "Profile": "User",
+      "Back": "ChevronLeft",
+      "Settings": "Settings2"
+    }
+  },
+  "media": {
+    "hero_onboarding": [
+      {
+        "url": "https://images.unsplash.com/photo-1753756510738-33a176dd3b0a",
+        "description": "Fountain pen resting atop a handwritten journal. Cinematic and tactile. Use for the initial sanctuary onboarding screen."
+      }
+    ],
+    "textures": [
+      {
+        "url": "https://images.unsplash.com/photo-1702753389906-4c87b7c17988",
+        "description": "Very old writing paper texture. Use as a subtle multiply/opacity blend background layer for the writing studio."
+      }
+    ],
+    "collections_thumbnails": [
+      {
+        "url": "https://images.unsplash.com/photo-1665059691261-daa5bacdf826",
+        "description": "Row of vintage books in a dark academia library. Use for literary or historical collections."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1774891937561-da8dd95bd9c9",
+        "description": "Envelopes with wax seals and a quill pen. Use for 'historical letters' or 'poetry' collections."
+      }
+    ],
+    "archive_thumbnails": [
+      {
+        "url": "https://images.unsplash.com/photo-1702753390018-76c147a55c3b",
+        "description": "Close up of an antique book with writing. Use for the Historical Cursive Archive tab."
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Build strictly as a React Native Expo application using StyleSheet. Do not use Tailwind/className.",
+    "Always apply a `data-testid` to interactive elements (buttons, inputs, tabs, list items) formatted in kebab-case based on their role.",
+    "Prioritize the 'sanctuary' feeling: use the defined generous whitespace, slow transitions, and strictly adhere to the warm ivory/charcoal palette.",
+    "Avoid gamification patterns like bright progress bars or red notification dots. Use subtle gold accents instead.",
+    "Ensure the Skia canvas implementation for handwriting rendering feels tactile, avoiding perfectly smoothed digital lines in favor of slight ink bleeding effects if possible.",
+    "Do NOT use a standard bottom tab bar with bright active colors; keep it minimal, serif-focused, with a muted gold active state.",
+    "Never use generic placeholder images; rely exclusively on the provided media URLs."
+  ]
+}
