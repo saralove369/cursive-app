@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, RotateCcw, ArrowRight } from 'lucide-react-native';
 import PaperBackground from '../../src/components/PaperBackground';
 import HandwritingCanvas from '../../src/components/HandwritingCanvas';
+import SkiaGate from '../../src/components/SkiaGate';
 import { colors, fonts, spacing, radius, shadow } from '../../src/theme';
 import { ALL_LETTERS, getLetter } from '../../src/data/cursive-letters';
 import { storage } from '../../src/lib/storage';
@@ -145,14 +146,16 @@ export default function PracticeScreen() {
         {/* Canvas */}
         <View style={styles.canvasCard}>
           <View style={styles.canvasInner}>
-            <HandwritingCanvas
-              guideStrokes={letterInfo?.strokes}
-              guideViewBox={letterInfo ? { width: 200, height: 200 } : undefined}
-              clearSignal={clearKey}
-              onChange={setStrokeCount}
-              showBaseline
-              strokeWidth={5}
-            />
+            <SkiaGate>
+              <HandwritingCanvas
+                guideStrokes={letterInfo?.strokes}
+                guideViewBox={letterInfo ? { width: 200, height: 200 } : undefined}
+                clearSignal={clearKey}
+                onChange={setStrokeCount}
+                showBaseline
+                strokeWidth={5}
+              />
+            </SkiaGate>
           </View>
         </View>
 

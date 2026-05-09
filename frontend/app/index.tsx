@@ -1,25 +1,35 @@
 import React, { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Redirect } from 'expo-router';
+import { useState } from 'react';
 import { storage } from '../src/lib/storage';
 import { colors } from '../src/theme';
 
 export default function Index() {
-  const router = useRouter();
+  const [destination, setDestination] = useState<'/onboarding' | '/(tabs)/studio' | null>(null);
 
   useEffect(() => {
-    const route = async () => {
-      await storage.getOrCreateUserId();
-      const onboarded = await storage.hasOnboarded();
-      if (onboarded) {
-        router.replace('/(tabs)/studio');
-      } else {
-        router.replace('/onboarding');
+    let alive = true;
+    (async () => {
+      try {
+        await storage.getOrCreateUserId();
+        const onboarded = await storage.hasOnboarded();
+        if (alive) {
+          setDestination(onboarded ? '/(tabs)/studio' : '/onboarding');
+        }
+      } catch (e) {
+        console.warn('index route err', e);
+        if (alive) setDestination('/onboarding');
       }
+    })();
+    return () => {
+      alive = false;
     };
-    const t = setTimeout(route, 280);
-    return () => clearTimeout(t);
-  }, [router]);
+  }, []);
+
+  if (destination) {
+    return <Redirect href={destination} />;
+  }
 
   return (
     <View style={styles.container} testID="splash-screen">

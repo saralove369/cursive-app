@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, RotateCcw, Check } from 'lucide-react-native';
 import PaperBackground from '../../src/components/PaperBackground';
 import HandwritingCanvas from '../../src/components/HandwritingCanvas';
+import SkiaGate from '../../src/components/SkiaGate';
 import { colors, fonts, spacing, radius, shadow } from '../../src/theme';
 import { api, HistoricalDocument } from '../../src/lib/api';
 import { storage } from '../../src/lib/storage';
@@ -165,12 +166,14 @@ export default function ArchiveDocScreen() {
             </View>
 
             <View style={styles.canvasCard}>
-              <HandwritingCanvas
-                clearSignal={clearKey}
-                onChange={setStrokes}
-                showBaseline
-                strokeWidth={4}
-              />
+              <SkiaGate>
+                <HandwritingCanvas
+                  clearSignal={clearKey}
+                  onChange={setStrokes}
+                  showBaseline
+                  strokeWidth={4}
+                />
+              </SkiaGate>
             </View>
 
             <View style={styles.writeFooter}>

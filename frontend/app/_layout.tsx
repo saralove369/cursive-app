@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
@@ -40,18 +39,17 @@ export default function RootLayout() {
   const ready = pf && eb && ct;
 
   useEffect(() => {
-    if (ready) {
+    // Hide splash whether fonts loaded or not after a short delay,
+    // so the app is never visually stuck.
+    const t = setTimeout(() => {
       SplashScreen.hideAsync().catch(() => {});
-    }
-  }, [ready]);
+    }, 500);
+    return () => clearTimeout(t);
+  }, []);
 
-  if (!ready) {
-    return (
-      <View style={styles.loader} testID="root-loader">
-        <ActivityIndicator color={colors.accent.gold} />
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync().catch(() => {});
+  }, [ready]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -67,12 +65,3 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  loader: {
-    flex: 1,
-    backgroundColor: colors.bg.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
