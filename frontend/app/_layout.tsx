@@ -19,6 +19,14 @@ import {
   useFonts as useCrimson,
   CrimsonText_400Regular,
 } from '@expo-google-fonts/crimson-text';
+import {
+  useFonts as useDancing,
+  DancingScript_400Regular,
+} from '@expo-google-fonts/dancing-script';
+import {
+  useFonts as useAllura,
+  Allura_400Regular,
+} from '@expo-google-fonts/allura';
 import { colors } from '../src/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -35,8 +43,10 @@ export default function RootLayout() {
     EBGaramond_600SemiBold,
   });
   const [ct] = useCrimson({ CrimsonText_400Regular });
+  const [ds] = useDancing({ DancingScript_400Regular });
+  const [al] = useAllura({ Allura_400Regular });
 
-  const ready = pf && eb && ct;
+  const ready = pf && eb && ct && ds && al;
 
   useEffect(() => {
     // Hide splash whether fonts loaded or not after a short delay,

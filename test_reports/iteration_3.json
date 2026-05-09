@@ -1,0 +1,49 @@
+{
+  "summary": "Cursive — Palmer Method (1888) penmanship redesign verified end-to-end. Backend: 17/17 pytest PASS (100%, 2.67s) — root, content (27 pieces / 8 categories / filter / 404), archive (5 docs / 404), sessions (create + persist + sort desc, content_type='letter' included), progress (totals/streak/zero), profiles (upsert + 404), favorites (CRUD + idempotent), penpal (signup + idempotent + 422). Frontend (web preview, 390x844): onboarding-screen renders + onboarding-skip works → routes to /(tabs)/studio. Studio shows new 'The eight foundational strokes.' section with FOUNDATION · THE PALMER METHOD, 1888 eyebrow; ALL 8 drill cards present with exact testIDs (drill-compact-oval, drill-direct-oval, drill-push-pull, drill-undercurve, drill-overcurve, drill-compact-loop, drill-descending-loop, drill-connector-rhythm). Letter grid: 26/26 lowercase tiles (letter-a..z) PRESENT; toggle-uppercase reveals exactly 9/9 capitals (A,B,C,L,M,O,P,S,T) and a 'remaining capitals coming soon' notice. word-love pill present. free-write-card present. letter-a tap → /practice/a — top bar shows 'a' in Allura copperplate, 'STROKE ORDER' cue box renders Palmer Method instruction ('Undercurve in. Counterclockwise oval. Down. Out.'), practice-back/practice-clear/footer-clear/footer-save all mounted. Drill card tap → /practice/drill/compact-oval — drill-back, drill-save mounted, cue + description rendered. Free Page → /practice/freewrite mounts. POST /api/sessions verified (pytest TestSessions includes content_type='letter' branch).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Skia canvas (4-line guide labels ASCENDER/HEADLINE/BASELINE/DESCENDER, slant guides at 12°, numbered gold stroke markers, 'Watch' replay button)",
+        "issue": "On web preview, canvaskit.wasm fails to load with 'Incorrect response MIME type' / 'expected magic word 00 61 73 6d, found 3c 21 44 4f' — the kubernetes ingress returns the SPA HTML fallback instead of the .wasm binary. SkiaGate gracefully degrades to a 'THE CANVAS IS UNAVAILABLE HERE' card on /practice/[letter], /practice/drill/[id], and /practice/freewrite. Consequently the in-canvas guide labels, slant guides, numbered start markers, and Watch replay button cannot be visually verified on web — they live INSIDE the Skia <Canvas>. Per agent context this is intentional ('Native is the target'). Verification of these elements requires Expo Go (iOS/Android).",
+        "affected_testIDs": ["footer-save", "drill-save", "watch-replay (if exists)"]
+      }
+    ],
+    "design_issues": [],
+    "react_native_issues": [
+      {
+        "component": "Console warnings (cosmetic, unchanged from iter_2)",
+        "issue": "'shadow*' style props deprecated (use boxShadow), 'props.pointerEvents' deprecated (use style.pointerEvents), 'useNativeDriver fallback to JS animation'. None affect functionality."
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_cursive_api.py",
+    "/app/test_reports/pytest/pytest_results.xml",
+    "/app/test_reports/iteration_3.json"
+  ],
+  "action_items": [
+    "Verify 4-line ruled guides (ASCENDER/HEADLINE/BASELINE/DESCENDER), 12° slant guides, numbered gold stroke markers (1, 2, ...), and the Watch replay button on Expo Go (iOS/Android) where Skia uses native JNI — these cannot be verified on web preview.",
+    "Verify multi-stroke letters i, j, t, x show two separate numbered stroke markers (Skia-only, native).",
+    "Verify Save & next on /practice/[letter] increments to next letter and POSTs content_type='letter' on native (POST endpoint itself is green in pytest).",
+    "(Optional, web-only) Either ship canvaskit.wasm in the Expo web export OR add ingress MIME mapping for *.wasm so Skia drawing works in browser preview. Currently SkiaGate is the correct UX for unsupported envs."
+  ],
+  "critical_code_review_comments": [
+    "Studio screen correctly composes the new 'eight foundational strokes' horizontal-scrolling section ABOVE the existing letter grid; testIDs follow the spec exactly (drill-{id}, letter-{char}, free-write-card, toggle-lowercase, toggle-uppercase, word-{w}). UPPERCASE_LETTERS now contains only A,B,C,L,M,O,P,S,T as documented; toggle-uppercase surfaces a 'coming soon' notice for the rest.",
+    "cursive-letters.ts data model migration is clean: CursiveLetter.strokes: LetterStroke[] with {d, start:{x,y}, direction, name}, plus letter-level {height, cue, description}. PRACTICE_WORDS / PRACTICE_SENTENCES exports preserved.",
+    "penmanship-drills.ts exports 8 drills with stable IDs that exactly match the studio testIDs.",
+    "Backend server.py untouched — no regressions; Pydantic + motor + idempotent seed + correct status codes all intact.",
+    "SkiaGate fallback continues to isolate canvaskit.wasm failures from the rest of the app — non-Skia routes (onboarding, studio, collections, archive, progress, profile, penpal) are unaffected."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (17/17)",
+    "frontend": "100% of web-verifiable testIDs PASS — onboarding (2/2), studio (1+8 drills+3 toggles+26 lowercase+9 uppercase+1 word+1 freewrite), practice/letter (4/4), practice/drill (2/2), freewrite route mount. In-canvas Skia features (guide labels, slant guides, numbered markers, Watch replay) are gated behind SkiaGate web-fallback by design — must be verified on native."
+  },
+  "seed_data_creation": "TEST_-prefixed user_ids and emails inserted by pytest run (sessions/profile/favorites/penpal). Idempotent. No production data touched.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Palmer Method redesign is fully wired up and matches the spec on every web-observable surface. Backend 17/17 green; reuse /app/backend/tests/test_cursive_api.py. UPPERCASE_LETTERS is intentionally A,B,C,L,M,O,P,S,T only — toggle-uppercase shows a 'remaining capitals coming soon' note. The 4-line ruled guides, 12° slant guides, numbered gold stroke markers, and Watch replay button are rendered INSIDE the Skia <Canvas> and therefore only visible on Expo Go / native (canvaskit.wasm 404→HTML on web preview is an unchanged infra limitation; SkiaGate gracefully shows 'THE CANVAS IS UNAVAILABLE HERE'). Recommend the next agent runs on Expo Go to verify guide rendering, multi-stroke numbering for i/j/t/x, slant guide angle, and the Watch replay animation. EXPO_BACKEND_URL=https://analog-restore.preview.emergentagent.com.",
+  "rca_of_issue": "No new bugs found in this iteration. Carry-over (web-only): canvaskit.wasm MIME-type 404 from kubernetes ingress prevents Skia drawing on web preview; SkiaGate already mitigates with a graceful fallback. To unblock web Skia drawing, ship canvaskit.wasm in the expo web-build assets and configure ingress to serve *.wasm with Content-Type: application/wasm. On native (Expo Go) Skia uses JNI and is unaffected — this is the intended target platform per the redesign brief."
+}

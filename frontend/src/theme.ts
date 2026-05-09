@@ -40,6 +40,11 @@ export const fonts = {
   bodyItalic: 'EBGaramond_400Regular_Italic',
   bodyBold: 'EBGaramond_600SemiBold',
   accent: 'CrimsonText_400Regular',
+  // Authentic instructional cursive (Palmer Method style)
+  cursive: 'DancingScript_400Regular',
+  cursiveBold: 'DancingScript_700Bold',
+  // Spencerian / copperplate flourish (more decorative — for hero / titles only)
+  copperplate: 'Allura_400Regular',
 } as const;
 
 export const type = {

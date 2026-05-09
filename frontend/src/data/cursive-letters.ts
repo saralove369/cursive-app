@@ -1,449 +1,622 @@
 /**
- * Cursive letter SVG paths.
- * Coordinate system: viewBox 0 0 200 200
- * Baseline ≈ y=130, midline ≈ y=85, top ≈ y=35, descender ≈ y=175
- * Each letter has one or more strokes. Multiple strokes drawn in order.
+ * Authentic Palmer Method (1888) cursive letter forms.
+ *
+ * Each letter is a sequence of discrete pen-strokes, drawn according to
+ * the proportional system used in 19th-century American penmanship manuals:
+ *
+ *   ViewBox: 280 × 240
+ *   Ascender top:  y =  30
+ *   Headline:      y = 110   (top of x-height / waistline)
+ *   Baseline:      y = 190
+ *   Descender:     y = 225
+ *
+ *   Slant: 12° from vertical (applied at render time via skewX transform)
+ *
+ * Each stroke records its start point so a numbered marker can be drawn
+ * on the practice canvas, and a `direction` tag so directional arrows
+ * may be rendered along the path.
  */
+
+export type LetterCase = 'lower' | 'upper';
+export type LetterHeight = 'minimum' | 'ascender' | 'descender' | 'capital';
+export type StrokeDirection = 'undercurve' | 'overcurve' | 'downstroke' | 'upstroke' | 'oval' | 'loop' | 'cross' | 'dot' | 'connector' | 'descender';
+
+export interface LetterStroke {
+  d: string;
+  start: { x: number; y: number };
+  direction: StrokeDirection;
+  /** A tiny instructional name. */
+  name: string;
+}
 
 export interface CursiveLetter {
   char: string;
-  case: 'lower' | 'upper';
-  strokes: string[]; // Each entry is an SVG path "d" string
-  startDot?: { x: number; y: number };
-  description?: string;
+  case: LetterCase;
+  height: LetterHeight;
+  strokes: LetterStroke[];
+  cue: string;
+  description: string;
 }
 
+export const VIEWBOX = { width: 280, height: 240 };
+export const GUIDES = {
+  ascenderTop: 30,
+  headline: 110,
+  baseline: 190,
+  descenderBottom: 225,
+};
+export const SLANT_DEGREES = 12;
+
+const stroke = (
+  d: string,
+  start: { x: number; y: number },
+  direction: StrokeDirection,
+  name: string,
+): LetterStroke => ({ d, start, direction, name });
+
+// --- LOWERCASE ---------------------------------------------------------------
 const LOWERCASE: CursiveLetter[] = [
   {
     char: 'a',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Undercurve in. Counterclockwise oval. Down. Out.',
+    description: 'The first minimum letter. Close the oval at the top.',
     strokes: [
-      'M 110 90 C 70 80 50 130 80 135 C 110 140 130 110 110 90 L 110 130 C 115 140 130 140 145 130',
+      stroke(
+        'M 95 188 C 110 172, 135 138, 152 118 C 142 108, 100 112, 95 145 C 90 180, 132 198, 156 178 C 162 152, 160 122, 152 118 L 158 188 C 175 195, 200 188, 220 176',
+        { x: 95, y: 188 },
+        'undercurve',
+        'undercurve · oval · downstroke · out',
+      ),
     ],
-    startDot: { x: 110, y: 90 },
   },
   {
     char: 'b',
     case: 'lower',
+    height: 'ascender',
+    cue: 'Undercurve up. Loop above. Down. Bowl. Exit at the headline.',
+    description: 'Exit b at the headline — never the baseline.',
     strokes: [
-      'M 60 130 C 60 100 65 60 80 45 C 90 35 100 45 90 70 L 75 130 C 80 140 100 130 110 110 C 120 90 100 75 80 95',
+      stroke(
+        'M 95 188 C 110 170, 130 130, 110 70 C 100 45, 80 38, 80 60 C 82 90, 115 130, 108 188 C 130 200, 160 188, 168 168 C 175 145, 162 132, 142 142 C 165 152, 195 158, 215 148',
+        { x: 95, y: 188 },
+        'loop',
+        'tall loop · downstroke · bowl · check exit',
+      ),
     ],
-    startDot: { x: 60, y: 130 },
   },
   {
     char: 'c',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Overcurve in. Open backward bowl. Out.',
+    description: 'Leave the curve open on the right.',
     strokes: [
-      'M 130 95 C 110 75 70 80 65 110 C 60 140 110 145 135 125',
+      stroke(
+        'M 192 130 C 175 112, 130 108, 105 132 C 80 158, 95 188, 132 192 C 165 196, 198 184, 220 172',
+        { x: 192, y: 130 },
+        'overcurve',
+        'overcurve · backward bowl · out',
+      ),
     ],
-    startDot: { x: 130, y: 95 },
   },
   {
     char: 'd',
     case: 'lower',
+    height: 'ascender',
+    cue: 'Oval. Stem to the ascender. Downstroke. Out.',
+    description: 'A short oval, then a tall stem.',
     strokes: [
-      'M 120 95 C 95 80 65 95 70 125 C 75 145 110 140 120 120 L 130 50 C 135 45 145 50 140 65 L 120 130 C 125 140 140 140 155 130',
+      stroke(
+        'M 95 188 C 110 172, 132 138, 148 118 C 138 108, 95 112, 92 145 C 88 180, 130 198, 154 178 C 160 150, 162 122, 158 118 C 162 102, 172 60, 178 50 C 184 42, 178 50, 174 65 L 168 188 C 188 198, 215 188, 232 175',
+        { x: 95, y: 188 },
+        'oval',
+        'oval · ascender stem · downstroke · out',
+      ),
     ],
-    startDot: { x: 120, y: 95 },
   },
   {
     char: 'e',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Undercurve into a small loop. Out.',
+    description: 'A tidy, deliberate loop.',
     strokes: [
-      'M 70 115 L 115 110 C 125 100 115 85 100 90 C 75 95 65 130 90 138 C 110 142 130 130 145 115',
+      stroke(
+        'M 95 188 C 108 175, 122 158, 145 145 C 168 138, 152 112, 130 128 C 112 142, 105 168, 130 188 C 162 196, 195 188, 218 174',
+        { x: 95, y: 188 },
+        'loop',
+        'undercurve · loop · out',
+      ),
     ],
-    startDot: { x: 70, y: 115 },
   },
   {
     char: 'f',
     case: 'lower',
+    height: 'descender',
+    cue: 'Up loop. Down through baseline. Lower loop. Cross. Out.',
+    description: 'Two loops drawn in one breath.',
     strokes: [
-      'M 90 130 C 95 100 100 60 110 45 C 120 35 130 50 120 70 L 95 130 L 90 160 C 85 175 70 175 65 165 C 62 158 70 152 80 152 L 130 130',
+      stroke(
+        'M 105 188 C 105 145, 110 90, 128 50 C 138 35, 132 38, 124 50 C 110 90, 92 145, 100 200 C 102 218, 90 226, 76 218 C 65 210, 80 202, 100 202 C 122 200, 138 198, 158 192 C 178 188, 195 184, 212 178',
+        { x: 105, y: 188 },
+        'loop',
+        'tall loop · descender loop · cross · out',
+      ),
     ],
-    startDot: { x: 90, y: 130 },
   },
   {
     char: 'g',
     case: 'lower',
+    height: 'descender',
+    cue: 'Oval. Down past the baseline. Loop. Out.',
+    description: 'The descender loop crosses at the baseline.',
     strokes: [
-      'M 115 90 C 80 85 60 130 90 138 C 115 140 130 115 115 90 L 115 145 C 110 175 80 180 70 165 C 65 155 80 150 95 155',
+      stroke(
+        'M 95 188 C 110 172, 135 138, 152 118 C 142 108, 100 112, 95 145 C 90 180, 132 198, 156 178 C 162 152, 160 122, 152 118 L 162 215 C 168 225, 130 230, 102 225 C 78 220, 88 200, 130 200 C 165 196, 198 188, 220 175',
+        { x: 95, y: 188 },
+        'oval',
+        'oval · descender loop · out',
+      ),
     ],
-    startDot: { x: 115, y: 90 },
   },
   {
     char: 'h',
     case: 'lower',
+    height: 'ascender',
+    cue: 'Tall loop. Arch. Out.',
+    description: 'A loop, then a single arch — like the top of an n.',
     strokes: [
-      'M 60 130 C 60 100 65 60 80 45 C 90 35 100 45 90 70 L 75 130 C 80 105 100 90 115 100 C 130 110 115 130 125 138 C 135 140 145 132 155 122',
+      stroke(
+        'M 95 188 C 110 170, 130 130, 110 70 C 100 45, 80 38, 80 60 C 82 90, 115 130, 108 188 C 115 158, 132 130, 152 130 C 172 130, 178 148, 168 188 C 180 198, 205 188, 222 175',
+        { x: 95, y: 188 },
+        'loop',
+        'tall loop · arch · out',
+      ),
     ],
-    startDot: { x: 60, y: 130 },
   },
   {
     char: 'i',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Undercurve. Down. Out. Lift. Dot above.',
+    description: 'The dot is added last, after the stroke is at rest.',
     strokes: [
-      'M 80 100 C 90 115 90 125 95 138 C 105 140 120 130 135 115',
-      'M 95 70 L 95 75',
+      stroke(
+        'M 95 188 C 110 170, 130 138, 130 118 L 142 188 C 162 198, 188 188, 210 175',
+        { x: 95, y: 188 },
+        'undercurve',
+        'undercurve · downstroke · out',
+      ),
+      stroke(
+        'M 138 88 C 142 86, 144 88, 142 92 C 140 95, 136 94, 136 90 Z',
+        { x: 138, y: 88 },
+        'dot',
+        'dot above',
+      ),
     ],
-    startDot: { x: 80, y: 100 },
   },
   {
     char: 'j',
     case: 'lower',
+    height: 'descender',
+    cue: 'Undercurve. Down past baseline. Loop. Lift. Dot above.',
+    description: 'Loop low; dot last.',
     strokes: [
-      'M 100 95 C 105 115 105 145 100 165 C 95 178 75 178 70 168 C 67 160 75 155 85 156',
-      'M 105 70 L 105 75',
+      stroke(
+        'M 95 188 C 110 170, 130 138, 128 118 C 132 145, 138 180, 142 215 C 142 225, 105 230, 82 222 C 70 215, 85 208, 108 210',
+        { x: 95, y: 188 },
+        'undercurve',
+        'undercurve · downstroke · descender loop',
+      ),
+      stroke(
+        'M 138 88 C 142 86, 144 88, 142 92 C 140 95, 136 94, 136 90 Z',
+        { x: 138, y: 88 },
+        'dot',
+        'dot above',
+      ),
     ],
-    startDot: { x: 100, y: 95 },
   },
   {
     char: 'k',
     case: 'lower',
+    height: 'ascender',
+    cue: 'Tall loop. Down. Knot at midline. Leg out.',
+    description: 'A small horizontal loop at the heart of the letter.',
     strokes: [
-      'M 60 130 C 60 100 65 60 80 45 C 90 35 100 45 90 70 L 75 130 C 90 110 110 100 120 105 C 105 115 95 125 110 130 C 125 135 130 130 145 120',
+      stroke(
+        'M 95 188 C 110 170, 130 130, 110 70 C 100 45, 80 38, 80 60 C 82 90, 115 130, 108 188 C 115 165, 130 145, 145 142 C 162 142, 158 158, 142 162 C 152 168, 165 180, 158 188 C 175 198, 200 188, 222 175',
+        { x: 95, y: 188 },
+        'loop',
+        'tall loop · downstroke · knot · leg out',
+      ),
     ],
-    startDot: { x: 60, y: 130 },
   },
   {
     char: 'l',
     case: 'lower',
+    height: 'ascender',
+    cue: 'Undercurve. Loop to the ascender. Down. Out.',
+    description: 'Tall, slender, unhurried.',
     strokes: [
-      'M 70 130 C 70 100 75 60 90 45 C 100 35 110 45 100 70 L 80 130 C 85 140 105 140 125 125',
+      stroke(
+        'M 95 188 C 110 170, 130 130, 110 70 C 100 45, 80 38, 80 60 C 82 90, 130 138, 132 188 C 150 198, 178 188, 200 175',
+        { x: 95, y: 188 },
+        'loop',
+        'tall loop · downstroke · out',
+      ),
     ],
-    startDot: { x: 70, y: 130 },
   },
   {
     char: 'm',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Three arches. Equal height. Out.',
+    description: 'Three peaks of the same height — the rhythm is the lesson.',
     strokes: [
-      'M 50 130 C 50 110 60 90 70 95 C 80 100 75 130 80 138 C 85 130 95 95 105 95 C 115 100 110 130 115 138 C 120 130 130 95 140 95 C 150 100 145 130 150 138 C 155 138 165 130 170 122',
+      stroke(
+        'M 80 188 C 88 168, 92 132, 100 118 C 108 138, 115 162, 118 188 C 124 168, 132 132, 140 118 C 148 138, 155 162, 158 188 C 164 168, 172 132, 180 118 C 188 138, 195 162, 198 188 C 212 198, 232 188, 248 175',
+        { x: 80, y: 188 },
+        'overcurve',
+        'three arches · out',
+      ),
     ],
-    startDot: { x: 50, y: 130 },
   },
   {
     char: 'n',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Two arches. Equal height. Out.',
+    description: 'The same rhythm as m, less one peak.',
     strokes: [
-      'M 60 130 C 60 110 70 90 80 95 C 90 100 85 130 90 138 C 95 130 105 95 120 95 C 130 100 125 130 130 138 C 140 138 150 130 160 122',
+      stroke(
+        'M 85 188 C 92 168, 96 132, 105 118 C 113 138, 120 162, 122 188 C 128 168, 138 132, 148 118 C 156 138, 162 162, 165 188 C 178 198, 200 188, 218 175',
+        { x: 85, y: 188 },
+        'overcurve',
+        'two arches · out',
+      ),
     ],
-    startDot: { x: 60, y: 130 },
   },
   {
     char: 'o',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Counterclockwise oval. Check at the top.',
+    description: 'Exit at the headline so o joins the next letter.',
     strokes: [
-      'M 115 95 C 80 85 65 130 90 138 C 115 140 135 115 120 95 C 115 90 110 90 110 92 L 130 100 C 140 105 150 100 160 92',
+      stroke(
+        'M 95 188 C 108 172, 132 138, 148 118 C 132 108, 92 112, 88 145 C 84 180, 128 198, 152 178 C 162 152, 158 120, 148 118 C 158 108, 178 105, 195 100 C 210 98, 220 100, 228 105',
+        { x: 95, y: 188 },
+        'oval',
+        'oval · check exit at headline',
+      ),
     ],
-    startDot: { x: 115, y: 95 },
   },
   {
     char: 'p',
     case: 'lower',
+    height: 'descender',
+    cue: 'Down past baseline. Up. Bowl. Out.',
+    description: 'Stem first, bowl second.',
     strokes: [
-      'M 60 100 C 70 95 75 110 70 130 L 65 165 C 70 175 75 170 80 160 L 90 110 C 100 90 130 90 130 110 C 130 130 100 145 80 130',
+      stroke(
+        'M 95 130 C 100 158, 105 195, 110 218 C 112 222, 116 220, 118 215 C 122 188, 128 150, 130 128 C 142 105, 175 108, 180 138 C 182 168, 145 178, 128 170 C 138 178, 152 188, 178 188 C 200 192, 218 185, 232 175',
+        { x: 95, y: 130 },
+        'descender',
+        'descender · upstroke · bowl · out',
+      ),
     ],
-    startDot: { x: 60, y: 100 },
   },
   {
     char: 'q',
     case: 'lower',
+    height: 'descender',
+    cue: 'Oval. Down past baseline. Curl right.',
+    description: 'The curl turns toward the next letter.',
     strokes: [
-      'M 115 90 C 80 85 60 130 90 138 C 115 140 130 115 115 90 L 115 145 C 115 165 125 175 140 175 C 130 170 130 160 138 160',
+      stroke(
+        'M 95 188 C 110 172, 135 138, 152 118 C 142 108, 100 112, 95 145 C 90 180, 132 198, 156 178 C 162 152, 160 122, 152 118 L 162 215 C 175 222, 200 218, 215 208 C 222 200, 218 195, 210 200',
+        { x: 95, y: 188 },
+        'oval',
+        'oval · descender · curl',
+      ),
     ],
-    startDot: { x: 115, y: 90 },
   },
   {
     char: 'r',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Undercurve. Small shoulder. Down. Out.',
+    description: 'A subtle shoulder — the most exacting of the minimum letters.',
     strokes: [
-      'M 60 130 C 70 110 75 95 85 90 C 95 92 90 105 80 110 C 95 105 110 100 125 105 C 115 115 115 125 125 138 C 135 138 145 130 155 122',
+      stroke(
+        'M 90 188 C 105 170, 128 138, 130 118 C 138 108, 152 110, 158 122 C 160 130, 158 138, 152 142 L 145 188 C 162 198, 188 188, 212 175',
+        { x: 90, y: 188 },
+        'undercurve',
+        'undercurve · shoulder · down · out',
+      ),
     ],
-    startDot: { x: 60, y: 130 },
   },
   {
     char: 's',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Up. Forward curve. Close at base.',
+    description: 'A single, graceful s-curve.',
     strokes: [
-      'M 130 95 C 115 80 90 85 85 105 C 80 125 130 115 125 135 C 120 145 95 145 80 130 L 130 130 C 140 130 150 122 155 115',
+      stroke(
+        'M 92 188 C 108 172, 132 152, 142 132 C 152 115, 168 110, 162 124 C 152 138, 128 145, 118 158 C 108 175, 115 188, 138 190 C 168 195, 198 188, 218 175',
+        { x: 92, y: 188 },
+        'undercurve',
+        'undercurve · forward curve · close',
+      ),
     ],
-    startDot: { x: 130, y: 95 },
   },
   {
     char: 't',
     case: 'lower',
+    height: 'ascender',
+    cue: 'Down. Out. Lift. Cross at the midline.',
+    description: 'The crossbar is added last.',
     strokes: [
-      'M 95 50 L 80 130 C 85 140 100 140 115 130',
-      'M 75 90 L 115 85',
+      stroke(
+        'M 100 180 C 108 158, 122 122, 132 75 L 138 188 C 155 198, 180 188, 200 175',
+        { x: 100, y: 180 },
+        'downstroke',
+        'downstroke · out',
+      ),
+      stroke(
+        'M 105 100 C 130 96, 158 96, 175 100',
+        { x: 105, y: 100 },
+        'cross',
+        'crossbar at midline',
+      ),
     ],
-    startDot: { x: 95, y: 50 },
   },
   {
     char: 'u',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Two undercurves, joined.',
+    description: 'The same rhythm, twice.',
     strokes: [
-      'M 60 95 C 60 115 65 135 80 138 C 95 140 105 125 110 110 L 105 95 C 105 115 110 135 120 138 C 135 140 145 130 155 120',
+      stroke(
+        'M 85 188 C 92 168, 100 138, 108 118 C 112 142, 118 175, 128 188 C 138 175, 145 142, 152 118 C 156 142, 162 175, 168 188 C 184 198, 208 188, 224 175',
+        { x: 85, y: 188 },
+        'undercurve',
+        'two undercurves · out',
+      ),
     ],
-    startDot: { x: 60, y: 95 },
   },
   {
     char: 'v',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Up. Down. Up. Check at the headline.',
+    description: 'Exit at the headline, like o.',
     strokes: [
-      'M 60 95 C 65 115 75 135 90 138 C 105 135 115 105 125 90 C 130 95 135 100 145 100 C 150 100 155 95 160 92',
+      stroke(
+        'M 90 188 C 100 170, 108 138, 115 118 C 122 142, 132 175, 142 188 C 152 175, 158 142, 162 118 C 152 132, 162 110, 180 105 C 198 100, 215 102, 225 108',
+        { x: 90, y: 188 },
+        'undercurve',
+        'undercurve · downstroke · check',
+      ),
     ],
-    startDot: { x: 60, y: 95 },
   },
   {
     char: 'w',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Two undercurves. Check at the headline.',
+    description: 'Two valleys, one breath.',
     strokes: [
-      'M 50 95 C 55 115 65 135 75 138 C 85 135 90 115 95 100 C 100 115 105 135 115 138 C 125 135 130 115 140 95 C 145 100 150 100 160 92',
+      stroke(
+        'M 75 188 C 82 170, 88 138, 95 118 C 102 142, 110 175, 118 188 C 128 175, 134 142, 140 118 C 146 142, 154 175, 162 188 C 172 175, 178 142, 184 118 C 175 132, 188 110, 205 105 C 222 100, 235 102, 245 108',
+        { x: 75, y: 188 },
+        'undercurve',
+        'two undercurves · check',
+      ),
     ],
-    startDot: { x: 50, y: 95 },
   },
   {
     char: 'x',
     case: 'lower',
+    height: 'minimum',
+    cue: 'Diagonal up. Lift. Cross down.',
+    description: 'Two strokes that meet at the centre.',
     strokes: [
-      'M 70 90 C 100 110 130 130 145 138',
-      'M 145 90 C 130 100 100 130 70 138',
+      stroke(
+        'M 90 188 C 108 172, 138 142, 175 118 C 185 115, 195 122, 200 132',
+        { x: 90, y: 188 },
+        'upstroke',
+        'rising stroke',
+      ),
+      stroke(
+        'M 105 122 C 138 142, 168 168, 195 188 C 212 196, 230 188, 240 178',
+        { x: 105, y: 122 },
+        'downstroke',
+        'crossing stroke',
+      ),
     ],
-    startDot: { x: 70, y: 90 },
   },
   {
     char: 'y',
     case: 'lower',
+    height: 'descender',
+    cue: 'Two undercurves. Down past baseline. Loop.',
+    description: 'A u with a descending loop.',
     strokes: [
-      'M 60 95 C 65 115 75 135 90 138 C 105 135 110 110 115 95 C 115 115 115 145 110 165 C 105 178 85 178 78 168 C 75 160 85 155 95 156',
+      stroke(
+        'M 85 188 C 92 168, 100 138, 108 118 C 112 142, 118 175, 128 188 C 138 175, 145 142, 152 118 L 162 215 C 165 225, 130 230, 102 225 C 78 220, 90 205, 130 205 C 162 200, 195 188, 218 175',
+        { x: 85, y: 188 },
+        'undercurve',
+        'undercurve · descender loop',
+      ),
     ],
-    startDot: { x: 60, y: 95 },
   },
   {
     char: 'z',
     case: 'lower',
+    height: 'descender',
+    cue: 'Compound curve. Down. Loop. Out.',
+    description: 'A small zig, then a descending loop.',
     strokes: [
-      'M 70 90 L 130 90 L 70 138 L 130 138 C 145 138 150 130 155 122',
+      stroke(
+        'M 102 130 C 122 110, 158 108, 175 122 L 102 188 L 168 192 L 162 215 C 158 225, 118 228, 95 220 C 78 212, 92 205, 122 205 C 152 200, 180 192, 200 180',
+        { x: 102, y: 130 },
+        'downstroke',
+        'zig · descender loop',
+      ),
     ],
-    startDot: { x: 70, y: 90 },
   },
 ];
 
+// --- UPPERCASE (selected, iconic Palmer capitals) ---------------------------
 const UPPERCASE: CursiveLetter[] = [
   {
     char: 'A',
     case: 'upper',
+    height: 'capital',
+    cue: 'Curved up. Down. Loop. Exit at baseline.',
+    description: 'A single-stroke flowing capital.',
     strokes: [
-      'M 50 145 C 65 100 90 50 110 35 C 120 30 125 40 130 60 L 145 145 M 70 110 L 135 110',
+      stroke(
+        'M 60 180 C 70 130, 95 70, 130 50 C 145 45, 152 60, 150 80 L 175 180 M 88 145 L 162 145',
+        { x: 60, y: 180 },
+        'upstroke',
+        'curved up · down · crossbar',
+      ),
     ],
-    startDot: { x: 50, y: 145 },
   },
   {
     char: 'B',
     case: 'upper',
+    height: 'capital',
+    cue: 'Down. Two bowls. Out.',
+    description: 'Two graceful bowls.',
     strokes: [
-      'M 50 145 C 60 110 70 65 85 40 C 95 35 105 45 100 60 L 75 145 M 80 75 C 110 70 140 75 140 95 C 140 110 110 110 95 105 M 95 105 C 130 105 155 115 150 130 C 145 145 110 150 80 140',
+      stroke(
+        'M 70 175 C 80 130, 90 70, 110 45 C 122 40, 130 50, 122 70 L 92 175 C 130 178, 175 178, 178 145 C 178 122, 138 118, 118 122 C 168 122, 195 138, 188 165 C 180 188, 130 192, 95 178',
+        { x: 70, y: 175 },
+        'downstroke',
+        'down · upper bowl · lower bowl',
+      ),
     ],
-    startDot: { x: 50, y: 145 },
   },
   {
     char: 'C',
     case: 'upper',
+    height: 'capital',
+    cue: 'Loop entry. Open backward C. Out.',
+    description: 'A single, open sweep.',
     strokes: [
-      'M 155 60 C 130 35 80 40 65 80 C 50 120 95 160 145 145 C 130 145 130 135 138 130',
+      stroke(
+        'M 195 70 C 165 35, 95 38, 75 90 C 60 138, 110 195, 178 178 C 168 178, 165 165, 175 158',
+        { x: 195, y: 70 },
+        'overcurve',
+        'open backward C',
+      ),
     ],
-    startDot: { x: 155, y: 60 },
-  },
-  {
-    char: 'D',
-    case: 'upper',
-    strokes: [
-      'M 50 145 C 60 110 70 65 90 40 C 100 35 110 45 105 60 L 80 145 C 110 150 155 140 160 100 C 160 60 130 50 95 65',
-    ],
-    startDot: { x: 50, y: 145 },
-  },
-  {
-    char: 'E',
-    case: 'upper',
-    strokes: [
-      'M 155 50 C 130 30 90 40 75 75 C 65 105 75 145 105 150 C 130 150 145 140 155 130 M 80 95 L 120 95',
-    ],
-    startDot: { x: 155, y: 50 },
-  },
-  {
-    char: 'F',
-    case: 'upper',
-    strokes: [
-      'M 60 145 C 75 110 90 65 110 40 C 120 35 130 45 125 60 L 100 145 C 95 160 80 155 70 145 M 75 90 L 130 85',
-    ],
-    startDot: { x: 60, y: 145 },
-  },
-  {
-    char: 'G',
-    case: 'upper',
-    strokes: [
-      'M 155 60 C 130 35 80 40 65 80 C 50 120 95 160 145 145 L 145 110 L 110 110',
-    ],
-    startDot: { x: 155, y: 60 },
-  },
-  {
-    char: 'H',
-    case: 'upper',
-    strokes: [
-      'M 50 145 C 60 110 70 65 90 40 C 100 35 110 45 100 60 L 75 145 M 130 50 C 140 45 150 50 145 65 L 120 145 M 80 95 L 140 90',
-    ],
-    startDot: { x: 50, y: 145 },
-  },
-  {
-    char: 'I',
-    case: 'upper',
-    strokes: [
-      'M 70 50 C 90 45 110 50 105 65 L 90 130 C 85 145 100 155 115 145',
-    ],
-    startDot: { x: 70, y: 50 },
-  },
-  {
-    char: 'J',
-    case: 'upper',
-    strokes: [
-      'M 130 50 C 140 45 150 50 140 65 L 115 150 C 105 175 80 175 70 160 C 65 150 80 145 95 150',
-    ],
-    startDot: { x: 130, y: 50 },
-  },
-  {
-    char: 'K',
-    case: 'upper',
-    strokes: [
-      'M 50 145 C 60 110 70 65 90 40 C 100 35 110 45 100 60 L 75 145 M 145 50 C 130 80 110 100 90 110 M 100 105 C 115 115 130 130 145 145',
-    ],
-    startDot: { x: 50, y: 145 },
   },
   {
     char: 'L',
     case: 'upper',
+    height: 'capital',
+    cue: 'Loop entry. Down. Exit along the baseline.',
+    description: 'A flowing single sweep.',
     strokes: [
-      'M 60 130 C 80 90 100 50 120 40 C 130 38 135 50 125 65 L 90 130 C 95 145 120 150 145 140',
+      stroke(
+        'M 75 165 C 100 110, 125 55, 150 45 C 162 42, 168 55, 158 70 L 110 165 C 118 180, 150 188, 185 175',
+        { x: 75, y: 165 },
+        'loop',
+        'loop · down · baseline exit',
+      ),
     ],
-    startDot: { x: 60, y: 130 },
   },
   {
     char: 'M',
     case: 'upper',
+    height: 'capital',
+    cue: 'Up. Down. Up. Down. Out.',
+    description: 'Three strokes, evenly spaced.',
     strokes: [
-      'M 40 145 C 50 110 65 65 80 45 C 90 40 95 55 90 70 L 75 145 M 75 145 C 85 110 95 75 110 60 C 120 60 120 75 115 90 L 100 145 M 100 145 C 110 115 120 80 135 65 C 145 60 150 75 145 90 L 145 145',
+      stroke(
+        'M 50 180 C 60 130, 78 75, 92 55 C 102 50, 105 65, 100 82 L 85 180 C 95 130, 108 80, 122 65 C 132 60, 132 78, 128 92 L 115 180 C 125 130, 138 80, 152 60 C 162 55, 168 70, 162 92 L 162 180',
+        { x: 50, y: 180 },
+        'upstroke',
+        'three peaks',
+      ),
     ],
-    startDot: { x: 40, y: 145 },
-  },
-  {
-    char: 'N',
-    case: 'upper',
-    strokes: [
-      'M 50 145 C 60 110 70 65 85 45 C 95 40 100 55 95 70 L 80 145 C 95 115 120 75 140 50 C 150 45 155 55 150 70 L 130 145',
-    ],
-    startDot: { x: 50, y: 145 },
   },
   {
     char: 'O',
     case: 'upper',
+    height: 'capital',
+    cue: 'Counterclockwise oval. Close at the top.',
+    description: 'A closed, leaning oval.',
     strokes: [
-      'M 130 45 C 90 30 50 70 60 110 C 70 150 130 160 155 130 C 170 105 165 60 130 45',
+      stroke(
+        'M 168 50 C 120 35, 65 80, 75 130 C 88 185, 165 200, 195 158 C 215 122, 205 60, 168 50',
+        { x: 168, y: 50 },
+        'oval',
+        'leaning oval',
+      ),
     ],
-    startDot: { x: 130, y: 45 },
   },
   {
     char: 'P',
     case: 'upper',
+    height: 'capital',
+    cue: 'Down. Up. Bowl. Out.',
+    description: 'A capital with a half-bowl.',
     strokes: [
-      'M 50 145 C 60 110 75 65 95 40 C 105 35 110 45 105 60 L 80 145 M 90 75 C 130 65 160 75 155 100 C 150 120 110 125 85 110',
+      stroke(
+        'M 70 180 C 80 130, 95 70, 115 45 C 128 40, 132 55, 125 75 L 95 180 C 130 95, 178 110, 175 145 C 170 175, 130 178, 105 162',
+        { x: 70, y: 180 },
+        'downstroke',
+        'down · upstroke · bowl',
+      ),
     ],
-    startDot: { x: 50, y: 145 },
-  },
-  {
-    char: 'Q',
-    case: 'upper',
-    strokes: [
-      'M 130 45 C 90 30 50 70 60 110 C 70 150 130 160 155 130 C 170 105 165 60 130 45 M 130 130 L 165 165',
-    ],
-    startDot: { x: 130, y: 45 },
-  },
-  {
-    char: 'R',
-    case: 'upper',
-    strokes: [
-      'M 50 145 C 60 110 70 65 90 40 C 100 35 110 45 100 60 L 75 145 M 80 75 C 120 70 150 80 145 100 C 140 115 110 115 90 110 M 100 110 C 115 120 130 130 150 145',
-    ],
-    startDot: { x: 50, y: 145 },
   },
   {
     char: 'S',
     case: 'upper',
+    height: 'capital',
+    cue: 'Loop entry. Forward S-curve. Close at baseline.',
+    description: 'A single fluid S.',
     strokes: [
-      'M 155 60 C 140 35 100 30 80 50 C 60 75 90 95 115 100 C 145 110 160 130 145 145 C 120 160 80 150 65 130',
+      stroke(
+        'M 195 70 C 178 38, 122 32, 95 60 C 70 92, 115 115, 145 122 C 188 132, 205 165, 178 188 C 145 205, 95 195, 75 168',
+        { x: 195, y: 70 },
+        'loop',
+        'loop · S · close',
+      ),
     ],
-    startDot: { x: 155, y: 60 },
   },
   {
     char: 'T',
     case: 'upper',
+    height: 'capital',
+    cue: 'Loop top. Down. Lift. Crossbar.',
+    description: 'A flagged stem.',
     strokes: [
-      'M 50 50 C 80 35 130 40 155 55 M 105 50 L 90 130 C 85 145 100 155 115 145',
+      stroke(
+        'M 60 60 C 95 40, 165 45, 195 65 M 130 55 L 105 175 C 110 188, 138 192, 165 178',
+        { x: 60, y: 60 },
+        'cross',
+        'crossbar · stem',
+      ),
     ],
-    startDot: { x: 50, y: 50 },
-  },
-  {
-    char: 'U',
-    case: 'upper',
-    strokes: [
-      'M 50 50 C 60 90 60 140 90 145 C 115 145 125 110 125 75 L 130 50 C 145 45 155 60 145 80 L 135 145',
-    ],
-    startDot: { x: 50, y: 50 },
-  },
-  {
-    char: 'V',
-    case: 'upper',
-    strokes: [
-      'M 50 50 C 65 95 80 130 100 145 C 110 140 125 95 145 50',
-    ],
-    startDot: { x: 50, y: 50 },
-  },
-  {
-    char: 'W',
-    case: 'upper',
-    strokes: [
-      'M 35 50 C 45 90 55 130 70 145 C 80 135 90 95 100 65 C 105 100 115 130 125 145 C 140 135 155 90 165 50',
-    ],
-    startDot: { x: 35, y: 50 },
-  },
-  {
-    char: 'X',
-    case: 'upper',
-    strokes: [
-      'M 55 50 C 90 90 125 130 150 145 M 150 50 C 130 70 100 110 60 145',
-    ],
-    startDot: { x: 55, y: 50 },
-  },
-  {
-    char: 'Y',
-    case: 'upper',
-    strokes: [
-      'M 55 50 C 70 80 90 110 100 130 L 100 165 C 95 178 75 178 65 168 M 145 50 C 130 80 110 110 100 130',
-    ],
-    startDot: { x: 55, y: 50 },
-  },
-  {
-    char: 'Z',
-    case: 'upper',
-    strokes: [
-      'M 60 55 C 90 45 130 45 150 60 L 60 145 C 90 145 130 145 155 135',
-    ],
-    startDot: { x: 60, y: 55 },
   },
 ];
 
 export const ALL_LETTERS: CursiveLetter[] = [...LOWERCASE, ...UPPERCASE];
+export const LOWERCASE_LETTERS = LOWERCASE;
+export const UPPERCASE_LETTERS = UPPERCASE;
 
-export const getLetter = (char: string): CursiveLetter | undefined => {
-  return ALL_LETTERS.find((l) => l.char === char);
-};
+export const getLetter = (char: string): CursiveLetter | undefined =>
+  ALL_LETTERS.find((l) => l.char === char);
 
 export const PRACTICE_WORDS = [
   'love',

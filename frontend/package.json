@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.20.6",
+    "@expo-google-fonts/allura": "^0.4.2",
     "@expo-google-fonts/crimson-text": "^0.4.0",
+    "@expo-google-fonts/dancing-script": "^0.4.2",
     "@expo-google-fonts/eb-garamond": "^0.4.2",
     "@expo-google-fonts/playfair-display": "^0.4.2",
     "@expo/metro-runtime": "^6.1.2",

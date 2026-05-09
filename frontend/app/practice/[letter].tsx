@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, RotateCcw, ArrowRight } from 'lucide-react-native';
@@ -7,51 +7,37 @@ import PaperBackground from '../../src/components/PaperBackground';
 import HandwritingCanvas from '../../src/components/HandwritingCanvas';
 import SkiaGate from '../../src/components/SkiaGate';
 import { colors, fonts, spacing, radius, shadow } from '../../src/theme';
-import { ALL_LETTERS, getLetter } from '../../src/data/cursive-letters';
+import {
+  ALL_LETTERS,
+  LOWERCASE_LETTERS,
+  UPPERCASE_LETTERS,
+  getLetter,
+  CursiveLetter,
+} from '../../src/data/cursive-letters';
 import { storage } from '../../src/lib/storage';
 import { api } from '../../src/lib/api';
 import { haptics } from '../../src/lib/haptics';
-
-const { width: W } = Dimensions.get('window');
 
 export default function PracticeScreen() {
   const { letter: param } = useLocalSearchParams<{ letter: string }>();
   const router = useRouter();
   const target = decodeURIComponent(param || 'a');
   const isFreeWrite = target === 'freewrite';
-  const isMulti = target.length > 1 && !isFreeWrite;
+
+  const letter = !isFreeWrite ? getLetter(target) : undefined;
 
   const [clearKey, setClearKey] = useState(0);
   const [strokeCount, setStrokeCount] = useState(0);
   const [savedOnce, setSavedOnce] = useState(false);
   const startedRef = useRef<number | null>(null);
 
-  // Letter mode info
-  const letterInfo = !isMulti && !isFreeWrite ? getLetter(target) : null;
-
-  // For words / sentences, we render the target text rather than guide paths.
-  const headerEyebrow = isFreeWrite
-    ? 'FREE PAGE'
-    : isMulti
-    ? 'WORD'
-    : letterInfo?.case === 'upper'
-    ? 'UPPERCASE'
-    : 'LOWERCASE';
-
-  const headerTitle = isFreeWrite
-    ? 'An open page'
-    : isMulti
-    ? target
-    : target;
-
-  // Navigation between letters
-  const lettersOfCase = useMemo(() => {
-    if (isMulti || isFreeWrite || !letterInfo) return [];
-    return ALL_LETTERS.filter((l) => l.case === letterInfo.case);
-  }, [isMulti, isFreeWrite, letterInfo]);
-
-  const idx = letterInfo ? lettersOfCase.findIndex((l) => l.char === letterInfo.char) : -1;
-  const nextLetter = idx >= 0 && idx < lettersOfCase.length - 1 ? lettersOfCase[idx + 1] : null;
+  // Navigate to next letter of the same case
+  const seq = useMemo(() => {
+    if (!letter) return [];
+    return letter.case === 'lower' ? LOWERCASE_LETTERS : UPPERCASE_LETTERS;
+  }, [letter]);
+  const idx = letter ? seq.findIndex((l) => l.char === letter.char) : -1;
+  const nextLetter: CursiveLetter | null = idx >= 0 && idx < seq.length - 1 ? seq[idx + 1] : null;
 
   useEffect(() => {
     startedRef.current = Date.now();
@@ -78,10 +64,10 @@ export default function PracticeScreen() {
     try {
       await api.createSession({
         user_id: userId,
-        content_type: isFreeWrite ? 'freewrite' : isMulti ? 'word' : 'letter',
+        content_type: isFreeWrite ? 'freewrite' : 'letter',
         duration_seconds: seconds,
-        word_count: isFreeWrite ? 0 : isMulti ? 1 : 0,
-        title: isFreeWrite ? 'Free page' : isMulti ? `Word: ${target}` : `Letter: ${target}`,
+        word_count: 0,
+        title: isFreeWrite ? 'Free page' : `Letter: ${target}`,
       });
       setSavedOnce(true);
       haptics.complete();
@@ -98,6 +84,12 @@ export default function PracticeScreen() {
       router.back();
     }
   };
+
+  const headerEyebrow = isFreeWrite
+    ? 'FREE PAGE'
+    : letter?.case === 'upper'
+    ? 'CAPITAL · PALMER METHOD'
+    : 'MINIMUM · PALMER METHOD';
 
   return (
     <PaperBackground variant="parchment">
@@ -116,7 +108,18 @@ export default function PracticeScreen() {
           </TouchableOpacity>
           <View style={styles.headCenter}>
             <Text style={styles.eyebrow}>{headerEyebrow}</Text>
-            <Text style={styles.title}>{headerTitle}</Text>
+            <Text style={styles.title}>{isFreeWrite ? 'An open page' : target}</Text>
+            {letter && (
+              <Text style={styles.height}>
+                {letter.height === 'minimum'
+                  ? 'minimum letter · 1 unit'
+                  : letter.height === 'ascender'
+                  ? 'ascender · 3 units'
+                  : letter.height === 'descender'
+                  ? 'descender · extends below baseline'
+                  : 'capital · 3 units'}
+              </Text>
+            )}
           </View>
           <TouchableOpacity
             onPress={handleClear}
@@ -128,16 +131,15 @@ export default function PracticeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Reference area */}
-        {!isFreeWrite && (
-          <View style={styles.referenceBox}>
-            <Text style={styles.refEyebrow}>Reference</Text>
-            <Text style={styles.refScript}>{target}</Text>
-            {isMulti ? (
-              <Text style={styles.refHint}>Trace each letter, slowly. The page is patient.</Text>
-            ) : (
-              <Text style={styles.refHint}>
-                Follow the gold guide. Lift your finger between strokes if needed.
+        {/* Instructional cue */}
+        {letter && (
+          <View style={styles.cueBox}>
+            <Text style={styles.cueEyebrow}>STROKE ORDER</Text>
+            <Text style={styles.cue}>{letter.cue}</Text>
+            {letter.strokes.length > 1 && (
+              <Text style={styles.penLifts}>
+                {letter.strokes.length} strokes · {letter.strokes.length - 1} pen lift
+                {letter.strokes.length - 1 === 1 ? '' : 's'}
               </Text>
             )}
           </View>
@@ -145,36 +147,49 @@ export default function PracticeScreen() {
 
         {/* Canvas */}
         <View style={styles.canvasCard}>
-          <View style={styles.canvasInner}>
-            <SkiaGate>
-              <HandwritingCanvas
-                guideStrokes={letterInfo?.strokes}
-                guideViewBox={letterInfo ? { width: 200, height: 200 } : undefined}
-                clearSignal={clearKey}
-                onChange={setStrokeCount}
-                showBaseline
-                strokeWidth={5}
-              />
-            </SkiaGate>
-          </View>
+          <SkiaGate>
+            <HandwritingCanvas
+              guideStrokes={letter?.strokes}
+              guideHeight={letter?.height}
+              showStrokeNumbers={!isFreeWrite}
+              showSlantGuides
+              allowReplay={!isFreeWrite}
+              clearSignal={clearKey}
+              onChange={setStrokeCount}
+              strokeWidth={5}
+            />
+          </SkiaGate>
         </View>
+
+        {/* Description */}
+        {letter && (
+          <Text style={styles.description}>{letter.description}</Text>
+        )}
 
         {/* Footer */}
         <View style={styles.footer}>
           <TouchableOpacity style={styles.ghostBtn} onPress={handleClear} testID="footer-clear">
             <Text style={styles.ghostText}>Clear</Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             style={[styles.primaryBtn, strokeCount === 0 && styles.primaryBtnSubtle]}
             onPress={handleSave}
             activeOpacity={0.85}
             testID="footer-save"
           >
-            <Text style={styles.primaryText}>
+            <Text
+              style={[
+                styles.primaryText,
+                strokeCount === 0 && { color: colors.text.secondary },
+              ]}
+            >
               {strokeCount === 0 ? 'Skip' : nextLetter ? 'Save & next' : 'Save'}
             </Text>
-            <ArrowRight size={16} color={colors.accent.ink} strokeWidth={1.5} />
+            <ArrowRight
+              size={16}
+              color={strokeCount === 0 ? colors.text.secondary : colors.accent.ink}
+              strokeWidth={1.5}
+            />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -186,16 +201,17 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   topBar: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
   },
   iconBtn: {
     width: 36,
     height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 18,
+    marginTop: 4,
   },
   headCenter: {
     flex: 1,
@@ -204,46 +220,54 @@ const styles = StyleSheet.create({
   eyebrow: {
     fontFamily: fonts.accent,
     fontSize: 10,
-    color: colors.text.muted,
+    color: colors.accent.gold,
     letterSpacing: 2.4,
     textTransform: 'uppercase',
   },
   title: {
-    fontFamily: fonts.headingItalic,
-    fontStyle: 'italic',
-    fontSize: 28,
-    color: colors.text.primary,
-    marginTop: 2,
-    letterSpacing: -0.3,
-  },
-  referenceBox: {
-    marginHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-  },
-  refEyebrow: {
-    fontFamily: fonts.accent,
-    fontSize: 10,
-    color: colors.accent.gold,
-    letterSpacing: 2.4,
-    textTransform: 'uppercase',
-    marginBottom: spacing.xs,
-  },
-  refScript: {
-    fontFamily: fonts.headingItalic,
-    fontStyle: 'italic',
+    fontFamily: fonts.copperplate,
     fontSize: 56,
     color: colors.text.primary,
-    letterSpacing: -0.5,
+    marginTop: 4,
+    letterSpacing: -0.3,
+    lineHeight: 64,
   },
-  refHint: {
+  height: {
     fontFamily: fonts.bodyItalic,
     fontStyle: 'italic',
-    fontSize: 13,
+    fontSize: 12,
     color: colors.text.muted,
-    marginTop: spacing.xs,
-    textAlign: 'center',
-    paddingHorizontal: spacing.lg,
+    marginTop: 2,
+  },
+  cueBox: {
+    marginHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: colors.border.light,
+  },
+  cueEyebrow: {
+    fontFamily: fonts.accent,
+    fontSize: 9,
+    color: colors.text.muted,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  cue: {
+    fontFamily: fonts.body,
+    fontSize: 14,
+    color: colors.text.primary,
+    letterSpacing: 0.2,
+    lineHeight: 20,
+  },
+  penLifts: {
+    fontFamily: fonts.bodyItalic,
+    fontStyle: 'italic',
+    fontSize: 12,
+    color: colors.text.muted,
+    marginTop: 4,
   },
   canvasCard: {
     flex: 1,
@@ -256,13 +280,19 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     ...shadow.soft,
   },
-  canvasInner: {
-    flex: 1,
+  description: {
+    fontFamily: fonts.bodyItalic,
+    fontStyle: 'italic',
+    fontSize: 13,
+    color: colors.text.muted,
+    textAlign: 'center',
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
   },
   footer: {
     flexDirection: 'row',
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+    paddingTop: spacing.sm,
     paddingBottom: spacing.md,
     alignItems: 'center',
     gap: spacing.md,
@@ -290,7 +320,7 @@ const styles = StyleSheet.create({
   primaryBtnSubtle: {
     backgroundColor: colors.bg.paper,
     borderWidth: 1,
-    borderColor: colors.accent.gold,
+    borderColor: colors.border.default,
   },
   primaryText: {
     fontFamily: fonts.body,
