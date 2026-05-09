@@ -1,0 +1,54 @@
+{
+  "summary": "Cursive — re-test after AsyncStorage web-fallback fix + SkiaGate wrapper. Backend: 17/17 pytest PASS (100%) — root, content (27 pieces / 8 categories / filter / single / 404), archive (5 docs / single / 404), sessions (create + persist + sort desc), progress (totals/streak/zeros), profiles (upsert + 404), favorites (add + idempotent + list + delete + verify gone), penpal (signup + idempotent + 422 invalid). Frontend (web preview, 390x844): index splash now redirects to /onboarding within ~15s (storage.ts Platform.OS=='web' uses localStorage — fix verified). Onboarding renders all 3 testIDs (onboarding-screen, onboarding-continue, onboarding-skip) with hero pen/paper image + serif title + italic body. Skip→/(tabs)/studio works. Studio renders studio-screen, free-write-card, toggle-lowercase, toggle-uppercase, exactly 26 letter tiles (letter-a..z) and 8 word pills (word-*). Practice/[letter] no longer red-screens — SkiaGate graceful-fallback works: shows 'THE CANVAS IS UNAVAILABLE HERE' message on web with all testIDs (practice-back, practice-clear, footer-clear, footer-save) still mounted; canvaskit.wasm fails on web due to Incorrect MIME type (served as HTML by ingress) — works on native per design. Collections-screen, Archive-screen, Progress-screen + streak-card, Profile-screen all render and navigate. Profile name editing flow (edit-name-btn → name-input → save-name-btn) saved 'Tester' successfully. Penpal /penpal direct route works end-to-end: penpal-email + penpal-submit → POST /api/penpal/signup → penpal-thank-you state rendered. SkiaGate confirmed not affecting non-Skia routes (penpal direct nav OK).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Practice / Session write phase / Archive transcribe (Skia drawing on web)",
+        "issue": "canvaskit.wasm fails to load on web preview with 'Failed to execute compile on WebAssembly: Incorrect response MIME type. Expected application/wasm.' followed by 'WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 44 4f' — the server is returning HTML (likely the SPA fallback) instead of the .wasm binary. SkiaGate catches this and shows the graceful 'THE CANVAS IS UNAVAILABLE HERE' fallback, so the app no longer crashes. Drawing/save/transcribe must be validated on Expo Go (native) where Skia uses JNI and does not need canvaskit-wasm. To enable web Skia drawing, the deployment ingress/static server needs a MIME type rule for *.wasm OR canvaskit.wasm needs to be copied into web-build/ assets at build time (npx expo export then serve canvaskit.wasm with correct mime).",
+        "affected_testIDs": ["practice-clear", "footer-clear", "footer-save", "begin-writing", "complete-session", "complete-archive"]
+      }
+    ],
+    "design_issues": [],
+    "react_native_issues": [
+      {
+        "component": "Collections cards / Archive cards / Category chips",
+        "issue": "Collections content cards, archive doc cards, and category chips render visually with correct data (e.g., 'Marcus Aurelius · 180 AD', 'Diary, October 1872', chips: All/Affirmations/Creativity/Gratitude/...) but did not match selectors [data-testid^='content-card-'], [data-testid^='archive-card-'], or [data-testid^='chip-']. Cards may use different testID naming conventions (e.g., piece-{id}, archive-{id}, category-{name}) or omit testIDs entirely. Recommend standardizing on content-card-{id}, archive-card-{id}, chip-{category} so automated tap-to-open-session and tap-to-open-archive flows can be exercised reliably."
+      },
+      {
+        "component": "Console warnings (cosmetic)",
+        "issue": "Repeated 'shadow*' style props deprecated (use boxShadow), 'props.pointerEvents' deprecated (use style.pointerEvents), 'useNativeDriver fallback to JS animation'. None affect functionality."
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_cursive_api.py",
+    "/app/test_reports/pytest/pytest_results.xml",
+    "/app/test_reports/iteration_2.json"
+  ],
+  "action_items": [
+    "Add testIDs content-card-{id}, archive-card-{id}, chip-{category} to Collections/Archive lists so the tap-to-session and tap-to-archive flows can be regression-tested in CI.",
+    "(Web only, optional) Configure ingress/static server to serve *.wasm with Content-Type: application/wasm, OR ship canvaskit.wasm in the Expo web export so Skia drawing works in browser. Currently SkiaGate gracefully degrades to a static fallback — Skia drawing only works on native Expo Go, which is by design per agent context.",
+    "Validate practice/[letter], session write phase, and archive transcribe phase on Expo Go (iOS/Android) for actual ink stroke + save flow.",
+    "(Optional cleanup) Align Skia / async-storage / linear-gradient / react-native-svg to Expo SDK expected versions to silence expo-doctor warnings; replace deprecated shadow* props with boxShadow, props.pointerEvents → style.pointerEvents."
+  ],
+  "critical_code_review_comments": [
+    "storage.ts fix is clean: Platform.OS==='web' branch returns localStorage adapter wrapped in resolved promises, native uses real AsyncStorage; preserves identical async API surface so callers (storage.getOrCreateUserId, hasOnboarded, setOnboarded etc.) need no changes. Empty try/catch fallbacks are appropriate for SSR/disabled-storage edge cases.",
+    "SkiaGate dynamic import + fallback UI is the right pattern; non-Skia routes (penpal, profile, progress, collections, archive list, studio, onboarding) are unaffected — verified by direct nav to /penpal.",
+    "Backend server.py unchanged, still solid: Pydantic validation, motor async, _id excluded, idempotent seed, idempotent favorites + profile upsert + penpal signup, correct status codes."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (17/17)",
+    "frontend": "9/9 critical web flows PASS — onboarding, studio, collections list, archive list, progress, profile (incl. name save), penpal (full signup→thank-you), practice fallback on web, SkiaGate isolation. Skia INK drawing on web is intentionally gated behind a fallback (works on native)."
+  },
+  "seed_data_creation": "TEST_-prefixed user_ids and emails created during pytest run; sessions/profile/penpal entries are tagged TEST_ for easy purge. No production data touched.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Storage web-fallback fix CONFIRMED working — index.tsx splash now redirects to /onboarding within ~15s on web. SkiaGate fallback CONFIRMED working — practice/[letter] no longer crashes the tree, shows 'CANVAS UNAVAILABLE HERE' graceful state on web. Backend 17/17 still green. Web-only blocker remains: canvaskit.wasm 404→HTML mimetype issue prevents real Skia drawing on web preview (this is infra/build, not code). Reuse /app/backend/tests/test_cursive_api.py for regression. Recommend testing Skia drawing on Expo Go before claiming feature-complete. Collections/archive cards lack standardized testIDs (content-card-{id}, archive-card-{id}, chip-{category}) — affects automation, not users. EXPO_BACKEND_URL=https://analog-restore.preview.emergentagent.com.",
+  "rca_of_issue": "Previous iteration RCA (AsyncStorage web hang + Skia crash) is now mitigated. (1) AsyncStorage hang: storage.ts now branches on Platform.OS — web path uses synchronous window.localStorage wrapped in async functions, so storage.hasOnboarded() resolves immediately and index.tsx splash can redirect to /onboarding. Verified with playwright: redirect happens within 15s. (2) Skia crash: HandwritingCanvas is now mounted via SkiaGate, which dynamic-imports CanvasKit on web and shows a fallback if loadSkiaWeb() rejects. Web preview's WebAssembly compile fails with 'Incorrect response MIME type' because the kubernetes ingress serves /static/canvaskit.wasm as HTML SPA fallback (404 fallback) — the .wasm file is not in the deployed bundle. SkiaGate catches the rejection and renders the 'CANVAS UNAVAILABLE' card. On native (Expo Go) the canvaskit-wasm path is not used (Skia is JNI), so drawing works. To unblock web Skia drawing in future: ship canvaskit.wasm in expo web-build assets and add a MIME mapping in the ingress."
+}
