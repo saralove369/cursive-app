@@ -1,0 +1,60 @@
+{
+  "summary": "Cursive MVP — comprehensive backend + frontend validation. Backend: 17/17 pytest tests PASS (100%) covering root, content (27 pieces, 8 categories, filtering, 404), archive (5 docs, 404), sessions (create + persisted + sorted desc), progress (totals, streaks, by-category, unknown-user zeros), profiles (upsert + 404), favorites (idempotent add + list + delete + verify gone), penpal (signup + idempotent + 422 on invalid email). Frontend (web preview, mobile viewport 390x844): onboarding, skip→studio, studio (26 letter tiles, 8 word pills, lowercase/uppercase toggle), collections (27 cards + 9 category chips incl. 'all'), category filter, archive list (5 docs), progress (streak-card + totals), profile (guest mode, name save persists as 'Tester'), penpal (full signup→thank-you) all PASS. Skia-dependent screens (practice/[letter], session write phase, archive transcribe phase) crash on web with 'CanvasKit undefined → Cannot read properties of undefined (reading PictureRecorder/Path)'. This is a known canvaskit-wasm web-init issue — must be validated on Expo Go (iOS/Android) per agent context note.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Practice screen (Skia) / Session write phase / Archive transcribe phase",
+        "issue": "On web preview, @shopify/react-native-skia HandwritingCanvas throws 'CanvasKit is not defined' and 'Cannot read properties of undefined (reading Path/PictureRecorder)' at src/components/HandwritingCanvas.tsx:47 when guideStrokes/Skia.Path.Make() is called before canvaskit-wasm has loaded. This crashes the React tree and breaks subsequent navigation until reload. Studio/Collections list/Archive list/Progress/Profile/Penpal all render correctly because they don't import Skia. RECOMMENDATION: (1) add a Skia readiness gate (e.g., useCanvasRef + WithSkiaWeb / loadSkiaWeb wrapper) before mounting <Canvas>; (2) wrap HandwritingCanvas in an Error Boundary so crashes don't kill navigation; (3) defer guideStrokes computation until after CanvasKit ready. Also: package version mismatch warning — @shopify/react-native-skia@2.6.2 expected 2.2.12 for Expo SDK; consider aligning to expected versions to avoid wasm-loader regressions.",
+        "affected_testIDs": ["practice-clear", "footer-save", "complete-session", "complete-archive"]
+      }
+    ],
+    "design_issues": [],
+    "react_native_issues": [
+      {
+        "component": "HandwritingCanvas (src/components/HandwritingCanvas.tsx)",
+        "issue": "Line 47 calls Skia.Path.Make() inside top-level useMemo before CanvasKit is available on web. Needs WithSkiaWeb wrapper or readiness check."
+      },
+      {
+        "component": "Multiple",
+        "issue": "Console warnings: 'shadow*' style props deprecated (use boxShadow); 'props.pointerEvents' deprecated (use style.pointerEvents); useNativeDriver fallback to JS animation. Cosmetic on web — does not affect functionality."
+      },
+      {
+        "component": "Package versions",
+        "issue": "Expo doctor warns @react-native-async-storage/async-storage@3.0.2 (expected 2.2.0), @shopify/react-native-skia@2.6.2 (expected 2.2.12), expo-linear-gradient@55.0.13 (expected ~15.0.8), react-native-svg@15.15.4 (expected 15.12.1)."
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_cursive_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Validate practice/[letter], session/[id] write phase, and archive/[id] transcribe phase on Expo Go (iOS/Android) — Skia canvas works on native but fails on web due to canvaskit-wasm init.",
+    "(Optional, web only) Wrap HandwritingCanvas with WithSkiaWeb (loadSkiaWeb) and add an Error Boundary so the crash doesn't take down the entire app on web.",
+    "(Optional) Align Skia / async-storage / linear-gradient / react-native-svg to Expo SDK expected versions to silence doctor warnings.",
+    "No backend changes needed — 100% backend success."
+  ],
+  "critical_code_review_comments": [
+    "server.py is well-structured (~660 lines, single file is acceptable for this scope). Uses Pydantic models, async motor, proper _id exclusion, idempotent seed, idempotent favorites/profile upsert/penpal signup. CORS open (*) — fine for guest-mode v1.",
+    "Streak calculation handles today/yesterday cursor correctly and survives empty session list.",
+    "All endpoints validate input via Pydantic; HTTP status codes used appropriately (404 on missing, 422 on invalid email)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_cursive_api.py (created)",
+    "/app/test_reports/pytest/pytest_results.xml (generated)"
+  ],
+  "success_rate": {
+    "backend": "100% (17/17)",
+    "frontend": "8/9 web flows PASS (89%); 1 web flow (Skia canvas screens) blocked by canvaskit-wasm init — expected to work on native per agent context note"
+  },
+  "seed_data_creation": "Used TEST_-prefixed user_ids and TEST_-prefixed emails; cleaned up via motor delete_many after run (2 sessions, 1 profile, 1 penpal entry purged).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend is rock-solid; reuse /app/backend/tests/test_cursive_api.py for regression. For frontend retest, skip practice/[letter], session write phase, archive transcribe phase on web preview unless E1 has wrapped HandwritingCanvas with WithSkiaWeb. All other tabs (Studio, Collections, Archive list, Progress, Profile, Penpal) work perfectly on web. Mobile viewport 390x844 used. Backend URL: EXPO_PUBLIC_BACKEND_URL=https://analog-restore.preview.emergentagent.com.",
+  "rca_of_issue": "Skia canvas screens fail on web because @shopify/react-native-skia requires canvaskit.wasm to be loaded before any Skia.Path.Make() call. In HandwritingCanvas.tsx:47 the guideStrokes useMemo executes synchronously on first render and calls Skia.Path.Make() which dereferences global CanvasKit — throwing 'Cannot read properties of undefined (reading Path)' on web. Fix on web: import { WithSkiaWeb } from '@shopify/react-native-skia/lib/module/web' and gate the canvas mount, or call loadSkiaWeb() in app/_layout.tsx before rendering Skia screens. On native (Expo Go), CanvasKit isn't used (Skia is JNI/native), so this error will not occur. Reproduction: Skip onboarding → Studio → tap any letter tile → red screen on web."
+}
