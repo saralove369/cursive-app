@@ -43,6 +43,8 @@ interface Props {
   /** Ink color and width. */
   inkColor?: string;
   strokeWidth?: number;
+  /** When true, gestures are disabled and only existing strokes/guides render. */
+  frozen?: boolean;
 }
 
 /**
@@ -65,6 +67,7 @@ export default function HandwritingCanvas({
   clearSignal = 0,
   inkColor = colors.accent.ink,
   strokeWidth = 5,
+  frozen = false,
 }: Props) {
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [strokes, setStrokes] = useState<UserStroke[]>([]);
@@ -246,6 +249,55 @@ export default function HandwritingCanvas({
   return (
     <GestureHandlerRootView style={styles.root}>
       <View style={styles.canvasWrap} onLayout={onLayout}>
+        {frozen ? (
+          <Canvas style={StyleSheet.absoluteFill}>
+            {/* Slant guides (drawn first, very faint) */}
+            {showSlantGuides &&
+              slantGuideLines.map((p, i) => (
+                <Path
+                  key={`slant-${i}`}
+                  path={p}
+                  color={colors.border.light}
+                  style="stroke"
+                  strokeWidth={0.5}
+                  opacity={0.5}
+                />
+              ))}
+
+            {/* 4-line rule paper */}
+            {ruleLinePaths.map((rule, i) => {
+              const y = toCanvasY(rule.y);
+              const p = Skia.Path.Make();
+              p.moveTo(offsetX, y);
+              p.lineTo(offsetX + VB_WIDTH * scale, y);
+              const isBase = rule.kind === 'base';
+              const isHeadOrBase = rule.kind === 'head' || rule.kind === 'base';
+              return (
+                <Path
+                  key={`rule-${i}`}
+                  path={p}
+                  color={isBase ? colors.border.strong : colors.border.default}
+                  style="stroke"
+                  strokeWidth={isBase ? 1.0 : isHeadOrBase ? 0.7 : 0.5}
+                  opacity={isHeadOrBase ? 0.6 : 0.4}
+                />
+              );
+            })}
+
+            {/* Frozen user strokes only (no guides, no input) */}
+            {strokes.map((s, i) => (
+              <Path
+                key={`u-${i}`}
+                path={s.path}
+                color={inkColor}
+                style="stroke"
+                strokeWidth={strokeWidth}
+                strokeJoin="round"
+                strokeCap="round"
+              />
+            ))}
+          </Canvas>
+        ) : (
         <GestureDetector gesture={pan}>
           <Canvas style={StyleSheet.absoluteFill}>
             {/* Slant guides (drawn first, very faint) */}
@@ -385,9 +437,10 @@ export default function HandwritingCanvas({
             )}
           </Canvas>
         </GestureDetector>
+        )}
 
         {/* Numbered labels (overlaid as RN Text for legibility) */}
-        {showStrokeNumbers &&
+        {showStrokeNumbers && !frozen &&
           guideSkPaths.map(({ start, index }) => {
             const startX = start.x - Math.tan(slantRad) * (start.y - GUIDES.baseline);
             const cx = toCanvasX(startX);
@@ -438,7 +491,7 @@ export default function HandwritingCanvas({
         )}
 
         {/* Replay button */}
-        {allowReplay && guideSkPaths.length > 0 && (
+        {allowReplay && !frozen && guideSkPaths.length > 0 && (
           <TouchableOpacity
             style={styles.replayBtn}
             activeOpacity={0.85}

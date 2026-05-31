@@ -46,6 +46,9 @@ export interface HistoricalDocument {
   era: string;
   source?: string | null;
   image_description: string;
+  image_url?: string | null;
+  archival_note?: string | null;
+  location?: string | null;
 }
 
 export interface WritingSession {

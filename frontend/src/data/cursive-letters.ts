@@ -472,140 +472,509 @@ const LOWERCASE: CursiveLetter[] = [
   },
 ];
 
-// --- UPPERCASE (selected, iconic Palmer capitals) ---------------------------
+// --- UPPERCASE — Palmer Method Capitals (1888) -------------------------------
+//
+// Construction system (consistent across all 26 letters):
+//   Cap top:    y = 50
+//   Cap mid:    y = 120
+//   Baseline:   y = 190
+//   Below base: y = 220 (descender for J, Y, Z)
+//   Left edge:  x ≈ 55-65
+//   Right edge: x ≈ 200-225
+//
+// All forms use smooth cubic-Bézier curves (no straight L segments mid-stroke)
+// so they feel hand-drawn, not typographic. Slant is applied at render time.
+//
 const UPPERCASE: CursiveLetter[] = [
+  // A — Spencerian/Palmer A: lower-left curved entry, peak, descending right
+  // arm, then crossbar (separate stroke).
   {
     char: 'A',
     case: 'upper',
     height: 'capital',
-    cue: 'Curved up. Down. Loop. Exit at baseline.',
-    description: 'A single-stroke flowing capital.',
+    cue: 'Curved up to peak. Down to baseline. Lift. Crossbar.',
+    description: 'A peak between two flowing strokes; crossbar last.',
     strokes: [
       stroke(
-        'M 60 180 C 70 130, 95 70, 130 50 C 145 45, 152 60, 150 80 L 175 180 M 88 145 L 162 145',
-        { x: 60, y: 180 },
+        'M 65 188 C 78 145, 100 95, 130 55 C 145 45, 152 50, 152 70 C 152 100, 162 150, 178 188 C 192 196, 210 188, 222 178',
+        { x: 65, y: 188 },
         'upstroke',
-        'curved up · down · crossbar',
+        'curved up · peak · down · out',
+      ),
+      stroke(
+        'M 95 145 C 120 138, 150 138, 170 145',
+        { x: 95, y: 145 },
+        'cross',
+        'crossbar at midline',
       ),
     ],
   },
+
+  // B — Capital stem with two stacked bowls. The Palmer B is one continuous
+  // stroke; pen does not lift between bowls.
   {
     char: 'B',
     case: 'upper',
     height: 'capital',
-    cue: 'Down. Two bowls. Out.',
-    description: 'Two graceful bowls.',
+    cue: 'Stem. Upper bowl. Lower bowl. Out.',
+    description: 'Two bowls stacked, drawn in one breath.',
     strokes: [
       stroke(
-        'M 70 175 C 80 130, 90 70, 110 45 C 122 40, 130 50, 122 70 L 92 175 C 130 178, 175 178, 178 145 C 178 122, 138 118, 118 122 C 168 122, 195 138, 188 165 C 180 188, 130 192, 95 178',
-        { x: 70, y: 175 },
+        'M 80 188 C 85 140, 100 80, 122 50 C 138 42, 148 55, 138 78 C 122 110, 100 160, 88 188 C 130 192, 178 178, 178 145 C 178 122, 138 122, 110 130 C 158 122, 200 138, 192 168 C 184 192, 130 195, 95 180',
+        { x: 80, y: 188 },
         'downstroke',
-        'down · upper bowl · lower bowl',
+        'stem · upper bowl · lower bowl',
       ),
     ],
   },
+
+  // C — Open backward C. Single graceful sweep with a small entry hook.
   {
     char: 'C',
     case: 'upper',
     height: 'capital',
-    cue: 'Loop entry. Open backward C. Out.',
-    description: 'A single, open sweep.',
+    cue: 'Hook entry from above. Backward C. Exit at baseline.',
+    description: 'One open sweep, like a sail catching wind.',
     strokes: [
       stroke(
-        'M 195 70 C 165 35, 95 38, 75 90 C 60 138, 110 195, 178 178 C 168 178, 165 165, 175 158',
-        { x: 195, y: 70 },
+        'M 200 75 C 195 55, 178 45, 158 50 C 115 55, 75 95, 78 138 C 82 180, 138 200, 188 180 C 200 175, 205 168, 200 162',
+        { x: 200, y: 75 },
         'overcurve',
-        'open backward C',
+        'hook · open C · check',
       ),
     ],
   },
+
+  // D — Capital stem on left, large oval body to baseline. One stroke.
+  {
+    char: 'D',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Stem. Bow out. Sweep around. Close to stem.',
+    description: 'A leaning oval on a single straight stem.',
+    strokes: [
+      stroke(
+        'M 75 188 C 80 145, 92 90, 110 55 C 122 45, 132 52, 128 72 C 118 100, 100 150, 90 188 C 140 195, 200 178, 205 122 C 208 75, 165 55, 118 70',
+        { x: 75, y: 188 },
+        'downstroke',
+        'stem · large oval · close',
+      ),
+    ],
+  },
+
+  // E — Two backward curves, one above the other, joined at the middle.
+  {
+    char: 'E',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Upper backward curve. Centre tuck. Lower backward curve.',
+    description: 'A figure of two soft loops, the centre held still.',
+    strokes: [
+      stroke(
+        'M 195 65 C 178 45, 138 42, 110 60 C 85 80, 95 110, 130 115 C 105 118, 88 132, 92 158 C 98 182, 158 192, 195 172',
+        { x: 195, y: 65 },
+        'overcurve',
+        'upper backward · waist · lower backward',
+      ),
+    ],
+  },
+
+  // F — Top flag and stem (one stroke); horizontal crossbar (second stroke).
+  {
+    char: 'F',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Top flag from right to left. Down. Lift. Crossbar.',
+    description: 'A flagged stem with a small bar at the heart.',
+    strokes: [
+      stroke(
+        'M 200 65 C 175 50, 145 48, 130 55 C 122 60, 122 72, 130 80 C 122 105, 110 150, 100 188 C 92 200, 75 195, 72 180',
+        { x: 200, y: 65 },
+        'overcurve',
+        'top flag · stem',
+      ),
+      stroke(
+        'M 90 125 C 110 120, 145 120, 165 125',
+        { x: 90, y: 125 },
+        'cross',
+        'crossbar at midline',
+      ),
+    ],
+  },
+
+  // G — A C with a small re-entry stroke from baseline back into the bowl.
+  {
+    char: 'G',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Backward C. Re-enter at baseline. Small inner stroke.',
+    description: 'A C that turns inward — the signature Palmer G.',
+    strokes: [
+      stroke(
+        'M 200 75 C 195 55, 178 45, 158 50 C 115 55, 75 95, 78 138 C 82 180, 138 198, 178 178 C 175 158, 172 138, 168 122 C 152 130, 138 132, 122 130',
+        { x: 200, y: 75 },
+        'overcurve',
+        'open C · inner stroke',
+      ),
+    ],
+  },
+
+  // H — Two parallel capital stems joined by a horizontal crossbar.
+  {
+    char: 'H',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Left stem with top loop. Lift. Right stem with top loop. Lift. Crossbar.',
+    description: 'Two stems and a single bar between them.',
+    strokes: [
+      stroke(
+        'M 60 95 C 68 65, 88 45, 105 52 C 118 60, 110 78, 95 80 C 88 110, 78 158, 70 188 C 75 198, 92 200, 105 188',
+        { x: 60, y: 95 },
+        'loop',
+        'left top loop · stem',
+      ),
+      stroke(
+        'M 165 60 C 178 55, 188 65, 178 78 C 168 105, 155 158, 148 188 C 152 198, 170 200, 185 188',
+        { x: 165, y: 60 },
+        'downstroke',
+        'right stem',
+      ),
+      stroke(
+        'M 88 122 C 115 118, 150 118, 170 122',
+        { x: 88, y: 122 },
+        'cross',
+        'crossbar between stems',
+      ),
+    ],
+  },
+
+  // I — Top loop, descending stem, base loop. One continuous stroke.
+  {
+    char: 'I',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Top loop. Down. Base loop. Exit.',
+    description: 'A spine between two small terminal loops.',
+    strokes: [
+      stroke(
+        'M 80 75 C 90 50, 115 42, 130 55 C 138 65, 130 78, 115 78 C 108 110, 95 158, 88 188 C 82 205, 60 208, 55 192 C 52 178, 75 175, 92 188 C 115 195, 150 192, 175 180',
+        { x: 80, y: 75 },
+        'loop',
+        'top loop · stem · base loop',
+      ),
+    ],
+  },
+
+  // J — Like I, but the stem extends below the baseline into a descending loop.
+  {
+    char: 'J',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Top loop. Down past the baseline. Descender loop.',
+    description: 'A taller I that dives below the line.',
+    strokes: [
+      stroke(
+        'M 130 75 C 140 50, 165 42, 178 55 C 185 65, 178 78, 162 78 C 158 110, 148 160, 138 195 C 130 218, 90 222, 75 205 C 65 192, 88 185, 105 198',
+        { x: 130, y: 75 },
+        'loop',
+        'top loop · stem · descender loop',
+      ),
+    ],
+  },
+
+  // K — Left stem (with top loop), then a separate compound stroke for the
+  // arm-knot-leg.
+  {
+    char: 'K',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Stem with top loop. Lift. Curve in. Knot. Leg out.',
+    description: 'A capital with a small heart-knot at its centre.',
+    strokes: [
+      stroke(
+        'M 60 95 C 68 65, 88 45, 105 52 C 118 60, 110 78, 95 80 C 88 110, 78 158, 70 188 C 75 198, 92 200, 108 188',
+        { x: 60, y: 95 },
+        'loop',
+        'left top loop · stem',
+      ),
+      stroke(
+        'M 195 55 C 175 80, 148 110, 115 122 C 138 130, 168 145, 152 168 C 145 180, 168 192, 192 182',
+        { x: 195, y: 55 },
+        'overcurve',
+        'arm · knot · leg',
+      ),
+    ],
+  },
+
+  // L — A graceful leaning loop, then exit along the baseline.
   {
     char: 'L',
     case: 'upper',
     height: 'capital',
-    cue: 'Loop entry. Down. Exit along the baseline.',
-    description: 'A flowing single sweep.',
+    cue: 'Loop in from below. Up. Down to baseline. Out.',
+    description: 'A flowing single sweep, the most graceful of capitals.',
     strokes: [
       stroke(
-        'M 75 165 C 100 110, 125 55, 150 45 C 162 42, 168 55, 158 70 L 110 165 C 118 180, 150 188, 185 175',
-        { x: 75, y: 165 },
+        'M 75 175 C 90 130, 110 80, 138 50 C 152 42, 162 50, 158 70 C 145 95, 118 145, 100 178 C 110 192, 145 195, 178 180',
+        { x: 75, y: 175 },
         'loop',
-        'loop · down · baseline exit',
+        'loop · stem · baseline exit',
       ),
     ],
   },
+
+  // M — Three peaks of equal height. One continuous stroke.
   {
     char: 'M',
     case: 'upper',
     height: 'capital',
-    cue: 'Up. Down. Up. Down. Out.',
-    description: 'Three strokes, evenly spaced.',
+    cue: 'Up to first peak. Down. Up to second. Down. Up to third. Down. Out.',
+    description: 'Three peaks evenly spaced; the rhythm is the lesson.',
     strokes: [
       stroke(
-        'M 50 180 C 60 130, 78 75, 92 55 C 102 50, 105 65, 100 82 L 85 180 C 95 130, 108 80, 122 65 C 132 60, 132 78, 128 92 L 115 180 C 125 130, 138 80, 152 60 C 162 55, 168 70, 162 92 L 162 180',
-        { x: 50, y: 180 },
+        'M 50 188 C 58 138, 75 75, 90 55 C 100 50, 105 60, 100 78 C 95 110, 88 155, 85 188 C 92 138, 108 80, 122 60 C 132 55, 138 65, 132 82 C 125 115, 118 158, 115 188 C 122 138, 138 80, 152 58 C 162 52, 170 62, 165 80 C 158 115, 152 158, 150 188 C 165 198, 188 195, 200 180',
+        { x: 50, y: 188 },
         'upstroke',
-        'three peaks',
+        'three peaks · out',
       ),
     ],
   },
+
+  // N — Two peaks. Same construction as M, less one peak.
+  {
+    char: 'N',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Up to first peak. Down. Up to second. Down. Out.',
+    description: 'The same rhythm as M, less one peak.',
+    strokes: [
+      stroke(
+        'M 60 188 C 68 138, 88 75, 105 55 C 115 50, 122 60, 115 78 C 108 110, 100 158, 95 188 C 105 138, 122 80, 138 58 C 150 52, 158 62, 152 80 C 145 115, 138 158, 135 188 C 148 198, 172 195, 188 180',
+        { x: 60, y: 188 },
+        'upstroke',
+        'two peaks · out',
+      ),
+    ],
+  },
+
+  // O — A leaning oval, closed at the top.
   {
     char: 'O',
     case: 'upper',
     height: 'capital',
-    cue: 'Counterclockwise oval. Close at the top.',
-    description: 'A closed, leaning oval.',
+    cue: 'Up and over. Counterclockwise oval. Close at the top.',
+    description: 'A closed oval, leaning forward like a held breath.',
     strokes: [
       stroke(
-        'M 168 50 C 120 35, 65 80, 75 130 C 88 185, 165 200, 195 158 C 215 122, 205 60, 168 50',
-        { x: 168, y: 50 },
+        'M 175 55 C 130 38, 78 70, 70 122 C 65 175, 130 200, 178 178 C 218 158, 220 85, 192 60 C 182 52, 168 52, 158 60',
+        { x: 175, y: 55 },
         'oval',
-        'leaning oval',
+        'leaning oval · close at top',
       ),
     ],
   },
+
+  // P — Capital stem with an upper bowl that closes back to the stem.
   {
     char: 'P',
     case: 'upper',
     height: 'capital',
-    cue: 'Down. Up. Bowl. Out.',
-    description: 'A capital with a half-bowl.',
+    cue: 'Stem. Upper bowl. Close to the stem.',
+    description: 'A stem with one closed bowl above the midline.',
     strokes: [
       stroke(
-        'M 70 180 C 80 130, 95 70, 115 45 C 128 40, 132 55, 125 75 L 95 180 C 130 95, 178 110, 175 145 C 170 175, 130 178, 105 162',
-        { x: 70, y: 180 },
+        'M 75 188 C 80 145, 95 90, 115 55 C 128 45, 138 52, 130 75 C 118 105, 102 152, 92 188 C 138 110, 195 110, 188 148 C 180 178, 130 178, 108 162',
+        { x: 75, y: 188 },
         'downstroke',
-        'down · upstroke · bowl',
+        'stem · bowl · close',
       ),
     ],
   },
+
+  // Q — A leaning oval (like O) with a final crossing flourish below.
+  {
+    char: 'Q',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Counterclockwise oval. Lift. Diagonal flourish across baseline.',
+    description: 'An O with a small dash — the Palmer Q.',
+    strokes: [
+      stroke(
+        'M 175 55 C 130 38, 78 70, 70 122 C 65 175, 130 200, 178 178 C 218 158, 220 85, 192 60 C 182 52, 168 52, 158 60',
+        { x: 175, y: 55 },
+        'oval',
+        'leaning oval',
+      ),
+      stroke(
+        'M 130 158 C 158 170, 188 185, 205 200',
+        { x: 130, y: 158 },
+        'cross',
+        'crossing flourish',
+      ),
+    ],
+  },
+
+  // R — Like P, with an additional descending leg from the bowl.
+  {
+    char: 'R',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Stem. Upper bowl. Close. Leg out at baseline.',
+    description: 'P with a leg.',
+    strokes: [
+      stroke(
+        'M 75 188 C 80 145, 95 90, 115 55 C 128 45, 138 52, 130 75 C 118 105, 102 152, 92 188 C 138 110, 195 110, 188 148 C 180 168, 130 168, 110 152 C 132 162, 158 178, 178 195',
+        { x: 75, y: 188 },
+        'downstroke',
+        'stem · bowl · leg',
+      ),
+    ],
+  },
+
+  // S — A forward S-curve. Single fluid stroke.
   {
     char: 'S',
     case: 'upper',
     height: 'capital',
-    cue: 'Loop entry. Forward S-curve. Close at baseline.',
+    cue: 'Hook entry from above. Forward curve. Loop close at baseline.',
     description: 'A single fluid S.',
     strokes: [
       stroke(
-        'M 195 70 C 178 38, 122 32, 95 60 C 70 92, 115 115, 145 122 C 188 132, 205 165, 178 188 C 145 205, 95 195, 75 168',
-        { x: 195, y: 70 },
+        'M 195 65 C 178 38, 122 32, 92 60 C 65 92, 110 118, 142 125 C 188 138, 205 168, 175 188 C 142 200, 92 188, 75 162',
+        { x: 195, y: 65 },
         'loop',
-        'loop · S · close',
+        'hook · forward S · close',
       ),
     ],
   },
+
+  // T — A flagged top stroke, then descending stem.
   {
     char: 'T',
     case: 'upper',
     height: 'capital',
-    cue: 'Loop top. Down. Lift. Crossbar.',
+    cue: 'Top flag from right to left. Down. Out.',
     description: 'A flagged stem.',
     strokes: [
       stroke(
-        'M 60 60 C 95 40, 165 45, 195 65 M 130 55 L 105 175 C 110 188, 138 192, 165 178',
-        { x: 60, y: 60 },
-        'cross',
-        'crossbar · stem',
+        'M 205 65 C 178 48, 145 45, 128 55 C 118 62, 118 75, 128 82 C 120 110, 108 158, 100 188 C 105 200, 130 200, 158 188',
+        { x: 205, y: 65 },
+        'overcurve',
+        'top flag · stem · out',
+      ),
+    ],
+  },
+
+  // U — Two arches joined: like a wide cursive 'u' grown tall.
+  {
+    char: 'U',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Up to first peak. Down. Curve through baseline. Up. Down. Out.',
+    description: 'Two parallel descending arches, joined by a curve at the base.',
+    strokes: [
+      stroke(
+        'M 55 60 C 60 105, 70 165, 95 178 C 122 182, 138 145, 138 100 C 138 78, 142 60, 155 52 C 168 48, 175 60, 168 80 C 162 110, 152 158, 148 188 C 158 198, 178 195, 195 180',
+        { x: 55, y: 60 },
+        'upstroke',
+        'two arches',
+      ),
+    ],
+  },
+
+  // V — A wide V; right arm exits with a small check at midline.
+  {
+    char: 'V',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Down to baseline. Up. Check exit at midline.',
+    description: 'A V with a graceful exit.',
+    strokes: [
+      stroke(
+        'M 55 55 C 70 100, 95 150, 118 178 C 132 168, 158 105, 175 55 C 178 80, 195 78, 215 70',
+        { x: 55, y: 55 },
+        'downstroke',
+        'V · check exit',
+      ),
+    ],
+  },
+
+  // W — Two V's joined; finishes with the same midline check as V.
+  {
+    char: 'W',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Down. Up. Down. Up. Check exit.',
+    description: 'Three valleys, one breath.',
+    strokes: [
+      stroke(
+        'M 35 55 C 50 100, 70 145, 85 178 C 95 168, 105 115, 110 65 C 118 105, 130 150, 142 178 C 152 168, 165 115, 175 60 C 180 80, 200 78, 220 70',
+        { x: 35, y: 55 },
+        'downstroke',
+        'three valleys · check',
+      ),
+    ],
+  },
+
+  // X — Two crossing diagonals, drawn as separate strokes.
+  {
+    char: 'X',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Diagonal down. Lift. Crossing diagonal.',
+    description: 'Two strokes meeting at the centre.',
+    strokes: [
+      stroke(
+        'M 65 55 C 92 95, 122 138, 152 188',
+        { x: 65, y: 55 },
+        'downstroke',
+        'first diagonal',
+      ),
+      stroke(
+        'M 175 55 C 145 95, 110 138, 78 188',
+        { x: 175, y: 55 },
+        'downstroke',
+        'crossing diagonal',
+      ),
+    ],
+  },
+
+  // Y — A V whose right arm continues below the baseline into a loop.
+  {
+    char: 'Y',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Down to centre. Lift. Down through centre, past baseline, loop.',
+    description: 'A V with a descending loop.',
+    strokes: [
+      stroke(
+        'M 60 55 C 80 95, 100 130, 115 150',
+        { x: 60, y: 55 },
+        'downstroke',
+        'left arm to centre',
+      ),
+      stroke(
+        'M 175 55 C 158 90, 138 130, 122 175 C 115 215, 75 222, 60 205 C 50 192, 75 188, 95 200',
+        { x: 175, y: 55 },
+        'descender',
+        'right arm · descender loop',
+      ),
+    ],
+  },
+
+  // Z — Compound zig at the top, a downstroke through baseline, descender loop.
+  {
+    char: 'Z',
+    case: 'upper',
+    height: 'capital',
+    cue: 'Compound entry. Zig at midline. Down. Descender loop.',
+    description: 'A zigzag with a descending loop.',
+    strokes: [
+      stroke(
+        'M 65 75 C 95 50, 138 50, 158 65 C 122 92, 88 122, 72 145 C 100 132, 138 132, 162 148 C 158 178, 152 200, 142 215 C 130 225, 88 225, 75 210 C 65 198, 90 192, 115 200 C 142 205, 175 195, 195 180',
+        { x: 65, y: 75 },
+        'overcurve',
+        'zig · descender · loop',
       ),
     ],
   },

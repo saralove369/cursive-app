@@ -47,6 +47,9 @@ class HistoricalDocument(BaseModel):
     era: str
     source: Optional[str] = None
     image_description: str  # description of what historical doc looks like
+    image_url: Optional[str] = None  # facsimile image
+    archival_note: Optional[str] = None  # short note for the manuscript room
+    location: Optional[str] = None  # where it was written / kept
 
 
 class WritingSessionCreate(BaseModel):
@@ -380,44 +383,70 @@ CURATED_CONTENT: List[Dict[str, Any]] = [
 
 CURATED_DOCUMENTS: List[Dict[str, Any]] = [
     {
-        "title": "Diary, October 1872",
-        "transcription": "The morning was uncommonly fine. I walked as far as the elm by the river and watched the light upon the water. I thought of you.",
-        "context": "From the personal diary of an unknown English country gentlewoman.",
-        "era": "1872",
-        "source": "Private Collection",
-        "image_description": "Aged ivory paper with looping copperplate handwriting in deep brown ink, slight foxing at the edges.",
+        "title": "Wild Nights — Wild Nights!",
+        "transcription": "Wild nights — Wild nights! Were I with thee Wild nights should be Our luxury! Futile — the winds — To a heart in port — Done with the compass — Done with the chart!",
+        "context": "An autograph manuscript of one of Emily Dickinson's most quietly incendiary poems. She was thirty when she copied it onto folded sheets that she stitched into the small hand-sewn booklets — fascicles — in which she kept her work for herself.",
+        "era": "circa 1861",
+        "source": "Houghton Library, Harvard",
+        "image_description": "Folded letter-paper, soft violet-grey ink, dashes that pause the eye, the word 'Wild' lifting like a small flag at the top.",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Emily_Dickinson_%22Wild_nights%22_manuscript.jpg/800px-Emily_Dickinson_%22Wild_nights%22_manuscript.jpg",
+        "archival_note": "Notice how the dashes are not punctuation but breath — short ones lean forward, long ones stretch the line. Dickinson punctuated by handwriting before she punctuated by grammar.",
+        "location": "Amherst, Massachusetts",
     },
     {
-        "title": "Receipt for a Cordial",
-        "transcription": "Take of fresh raspberries one quart, of fine sugar a pound and half. Crush and let stand in a stone jar. After three days, strain through linen.",
-        "context": "From a household manuscript of preserves and cordials, kept by generations of women in a Cornish farmhouse.",
-        "era": "circa 1850",
-        "source": "Family Archive",
-        "image_description": "Cream-colored paper with even Spencerian script, occasional ink blotches, a faint stain of fruit juice in the margin.",
+        "title": "Letter to Cassandra",
+        "transcription": "My dear Cassandra, I have received your letter, and I thank you for it. I am very glad you are returned safe from your journey; you have suffered, I am afraid, more than was needful. The weather here is fine. I hope it is the same with you.",
+        "context": "Jane Austen wrote nearly weekly to her elder sister Cassandra throughout her life. This letter, sent from Bath in May 1801, is part of the small surviving correspondence between them — Cassandra burned most of the rest after Jane's death, an act of editorial love whose loss the world has not quite forgiven.",
+        "era": "12 May 1801",
+        "source": "Morgan Library & Museum, New York",
+        "image_description": "Small folded sheet, even slightly forward-leaning hand, the lines tight and economical, the page near-full because paper was expensive and a sister's words were not.",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Letter_to_Cassandra_Austen%2C_by_Jane_Austen%2C_Bath%2C_12_May_1801_-_Morgan_Library_%26_Museum_-_New_York_City_-_DSC06587.jpg/800px-Letter_to_Cassandra_Austen%2C_by_Jane_Austen%2C_Bath%2C_12_May_1801_-_Morgan_Library_%26_Museum_-_New_York_City_-_DSC06587.jpg",
+        "archival_note": "Austen's hand is the trained Italian hand of a gentlewoman of her generation — slender, slanted, with very little space between lines. To save paper, she occasionally 'crossed' her letters, writing a second page sideways across the first.",
+        "location": "Bath, England",
     },
     {
-        "title": "Letter, Paris, 1889",
-        "transcription": "Mon cher ami, the city is in love with itself this spring. I have walked along the Seine until my feet ached. I miss you, but only sometimes.",
-        "context": "An expatriate letter, written from a small apartment near the Tuileries.",
-        "era": "1889",
-        "source": "Belle Époque Collection",
-        "image_description": "Thin onionskin paper, slanted feminine cursive, the slight imprint of a previous letter showing through.",
+        "title": "Letter from Arles",
+        "transcription": "My dear Bernard, I am writing to you from the Yellow House. The light here is unlike any light I have known. It is very hot. The cicadas sing all day long. I am painting wheatfields. Write to me.",
+        "context": "Vincent van Gogh wrote constantly to his friend Émile Bernard during his fevered Arles period of 1888. He used letters the way he used canvases — to test ideas, to ask, to be less alone. The transcription here is paraphrased from his April letter; the original is in his looping, urgent French.",
+        "era": "April 1888",
+        "source": "Morgan Library & Museum, New York",
+        "image_description": "A page densely written in a quick, slightly forward-leaning hand, the margins generous, occasional small thumbnail sketches drifting between the paragraphs.",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Gogh_-_Autograph_letter_signed_Arles%2C_to_%C3%89mile_Bernard%2C_ca._1888_Apr._12%2C_MA_6441.3.jpg/800px-Gogh_-_Autograph_letter_signed_Arles%2C_to_%C3%89mile_Bernard%2C_ca._1888_Apr._12%2C_MA_6441.3.jpg",
+        "archival_note": "Watch how Van Gogh's letterforms speed up and slow down across the page — the lines bunch where he is excited, open where he is thinking. He drew while he wrote; his correspondence is a kind of sketchbook.",
+        "location": "Arles, Provence",
     },
     {
-        "title": "Notebook of a Naturalist",
-        "transcription": "The wren returned to the hedgerow this morning. I observed her three separate times before noon. The light was a pale and silver thing.",
-        "context": "A page from the field notebook of a Victorian amateur naturalist.",
-        "era": "1894",
-        "source": "Naturalist Society Archive",
-        "image_description": "Small notebook page with neat upright cursive, a tiny ink sketch of a wren in the margin.",
+        "title": "From a Botanist's Hand",
+        "transcription": "Monsieur, I send you herewith the seeds you requested. The Rosa noisettiana flowers most abundantly this season. Should you require cuttings of the new climber, write to me before the first frost.",
+        "context": "Louis Noisette was a celebrated nineteenth-century French nurseryman, the brother of the American breeder who gave the Noisette rose its name. His correspondence — meticulous, generous, full of soil and weather — survives in scattered archives, mostly in the Wellcome Collection and the libraries of the great botanical gardens.",
+        "era": "early 19th century",
+        "source": "Wellcome Collection",
+        "image_description": "Rich cream paper, copperplate hand with elegant looping ascenders, a signature that flourishes into a small drawn vine at the foot of the page.",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Signed_autograph_letter_by_Louis_Noisette%2C_19th_c._Wellcome_L0075107.jpg/800px-Signed_autograph_letter_by_Louis_Noisette%2C_19th_c._Wellcome_L0075107.jpg",
+        "archival_note": "Botanists' letters are a small genre of their own — the handwriting tends to be precise (because plant names must be), but warm (because the writer is, almost without exception, in love with what they are writing about).",
+        "location": "Paris",
     },
     {
-        "title": "A Mother's Letter",
-        "transcription": "My dearest, do not forget to write. Sleep well. Eat the soup. The world is large but you are not alone in it. I am with you in every sentence.",
-        "context": "From a mother to a son away at university.",
-        "era": "circa 1910",
-        "source": "Private Family Papers",
-        "image_description": "Soft warm paper, gentle rounded cursive, a single tear stain near the closing.",
+        "title": "From a Receipt Book",
+        "transcription": "To make a fine raspberry cordial. Take of fresh raspberries two pounds, of fine sugar one pound. Crush in a stone jar and let stand four days, stirring once each morning. Strain through linen and bottle. It will keep all winter.",
+        "context": "An English household manuscript of culinary and medical 'receipts' — what we would now call recipes — kept and added to across generations. Such books often passed from mother to daughter and contain the small archaeology of a household: a cure for a cough, a stain remedy, a Christmas cake, a love-token sweet.",
+        "era": "circa 1700–1800",
+        "source": "Wellcome Collection",
+        "image_description": "Open page-spread of an old receipt book, multiple hands across the years, brown iron-gall ink that has bled gently into the soft handmade paper.",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/English_culinary_and_medical_recipe_book_Wellcome_L0050232.jpg/800px-English_culinary_and_medical_recipe_book_Wellcome_L0050232.jpg",
+        "archival_note": "Observe the difference in hands — at least three women wrote in this book over fifty years. The earliest hand is the most flourished; the later ones plainer. Domestic handwriting tends, across generations, toward greater speed and less ornament.",
+        "location": "England",
+    },
+    {
+        "title": "Safe in their Alabaster Chambers",
+        "transcription": "Safe in their Alabaster Chambers — Untouched by Morning — And untouched by noon — Sleep the meek members of the Resurrection — Rafter of Satin and Roof of Stone.",
+        "context": "An autograph copy of one of Emily Dickinson's most-revised poems. She wrote at least five versions of these opening stanzas over a decade, sending different drafts to different correspondents and stitching her favoured version into Fascicle Six.",
+        "era": "1862",
+        "source": "Digital Commonwealth (Boston Public Library)",
+        "image_description": "Ivory paper, slim columnar lines, the long horizontal dashes Dickinson loved, an inkwell that runs slightly thin near the bottom of the page.",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Emily_Dickinson%2C_Amherst%2C_Mass.%2C_autograph_manuscript_poem%2C_Safe_in_their_Alabaster_Chamber%2C_1862%2C_from_the_Digital_Commonwealth_-_1_commonwealth_kh04mv67t.jpg/800px-Emily_Dickinson%2C_Amherst%2C_Mass.%2C_autograph_manuscript_poem%2C_Safe_in_their_Alabaster_Chamber%2C_1862%2C_from_the_Digital_Commonwealth_-_1_commonwealth_kh04mv67t.jpg",
+        "archival_note": "Compare this hand with 'Wild nights' — five years apart, the same writer. The slant is steeper here, the dashes more emphatic. Handwriting is a slow self-portrait.",
+        "location": "Amherst, Massachusetts",
     },
 ]
 
@@ -448,12 +477,23 @@ async def seed_content():
             await db.content_library.insert_one(doc)
         logging.info(f"Seeded {len(CURATED_CONTENT)} content pieces.")
 
-    docs_existing = await db.historical_documents.count_documents({})
-    if docs_existing == 0:
+    # Always re-seed historical documents to ensure latest authentic Wikimedia
+    # facsimiles are present; this is a small curated set so cost is negligible.
+    existing_count = await db.historical_documents.count_documents({})
+    existing_first = await db.historical_documents.find_one({}, {"_id": 0, "image_url": 1, "title": 1})
+    expected_first = CURATED_DOCUMENTS[0]
+    needs_reseed = (
+        existing_count != len(CURATED_DOCUMENTS)
+        or not existing_first
+        or existing_first.get("title") != expected_first["title"]
+        or existing_first.get("image_url") != expected_first["image_url"]
+    )
+    if needs_reseed:
+        await db.historical_documents.delete_many({})
         for d in CURATED_DOCUMENTS:
             doc = HistoricalDocument(**d).dict()
             await db.historical_documents.insert_one(doc)
-        logging.info(f"Seeded {len(CURATED_DOCUMENTS)} historical documents.")
+        logging.info(f"Re-seeded {len(CURATED_DOCUMENTS)} historical documents (authentic facsimiles).")
 
 
 # ---------- Routes ----------

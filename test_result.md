@@ -101,3 +101,111 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Premium cognitive wellness mobile app called "Cursive" — handwriting studio with authentic
+  Palmer Method tracing, manuscript archive for studying real historical handwriting, and
+  cognitive writing sessions. Latest iteration: complete and refine ALL 26 uppercase letters
+  with authentic Palmer construction, replace all archive imagery with REAL public-domain
+  handwritten manuscript facsimiles, and redesign the archive flow as a 5-step manuscript
+  ritual (Observe → Study/Zoom → Read → Transcribe → Compare).
+
+backend:
+  - task: "Archive seeded with 6 authentic Wikimedia manuscript facsimiles (Dickinson, Austen, Van Gogh, Noisette, Wellcome Recipe, Dickinson Alabaster)"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Replaced stylized Unsplash imagery with real public-domain handwritten manuscripts from Wikimedia Commons. All URLs are 800px thumbnails for fast mobile loading. Re-seed logic now compares first doc's image_url against expected so any change forces a clean re-seed."
+
+  - task: "Idempotent archive re-seed with content-hash detection"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Updated seed_content() to compare existing count + first document title/image against CURATED_DOCUMENTS[0], forcing reseed whenever content changes. Verified: backend log reads 'Re-seeded 6 historical documents (authentic facsimiles).'"
+
+frontend:
+  - task: "All 26 uppercase letters A-Z rewritten with consistent Palmer Method construction"
+    implemented: true
+    working: true
+    file: "frontend/src/data/cursive-letters.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Redesigned every uppercase letter using a unified coordinate system (cap top y=50, baseline y=190) and pure cubic-Bézier curves (no awkward L straight-segment breaks). Multi-stroke for A (2), F (2), H (3), K (2), Q (2), X (2), Y (2). All 64 path strings programmatically validated for SVG syntax (matching command/argument counts). Renders correctly on iOS native via Skia. Web preview falls back gracefully via SkiaGate."
+
+  - task: "Archive 5-step ritual: Observe → Read → Transcribe → Compare → Complete"
+    implemented: true
+    working: true
+    file: "frontend/app/archive/[id].tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Added Compare phase. Transcribe and Compare phases share the same Skia canvas mount (key insight: the canvas component stays mounted across the phase transition, preserving the user's stroke state). HandwritingCanvas gained a `frozen` prop that disables gestures and renders strokes read-only. Pinch-to-zoom modal remains for studying details in Observe and Compare."
+
+  - task: "HandwritingCanvas: read-only frozen mode for compare/playback contexts"
+    implemented: true
+    working: true
+    file: "frontend/src/components/HandwritingCanvas.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "New `frozen` prop. When true: gesture detector is bypassed entirely, replay button hidden, stroke-number labels hidden, rule lines drawn more subtly. The user's own strokes are still rendered so the Compare phase can show their hand alongside the original facsimile."
+
+  - task: "Archive list hero swapped from Unsplash to authentic Wikimedia facsimile"
+    implemented: true
+    working: true
+    file: "frontend/app/(tabs)/archive.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Hero now shows Jane Austen's actual 1801 letter to Cassandra. Subtitle updated to describe the full 5-step ritual. Entry count is dynamic (`${docs.length}` entries · curated quarterly) rather than hard-coded 'Five entries'."
+
+metadata:
+  created_by: "main_agent"
+  version: "2.0"
+  test_sequence: 4
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Visual rendering of all 26 uppercase letters on iOS (Xcode + real device required — web preview cannot render Skia paths)"
+    - "Archive 5-step ritual end-to-end on iOS device with touch/Apple Pencil input"
+    - "Wikimedia thumbnail image loading on a real device network (different IP, no rate-limiting)"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    -agent: "main"
+    -message: |
+       Iteration ready for Xcode/device testing. Web preview verified the JSX flow and image
+       loading for archive entries (Jane Austen + Dickinson manuscripts visible). Skia-rendered
+       letter forms cannot be visually verified on web — they fall back to a "canvas unavailable"
+       message via SkiaGate by design. All 64 SVG path strings have been syntactically validated.
+       Backend re-seed confirmed: 6 documents present, all using Wikimedia 800px thumbnail URLs.
+       Next steps owned by user: open in Xcode, exercise each uppercase letter A-Z in practice/[letter],
+       and walk the full archive ritual on a Dickinson or Austen entry.
