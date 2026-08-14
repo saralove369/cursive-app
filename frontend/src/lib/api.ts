@@ -47,6 +47,7 @@ export interface HistoricalDocument {
   source?: string | null;
   image_description: string;
   image_url?: string | null;
+  asset_key?: string | null;
   archival_note?: string | null;
   location?: string | null;
 }

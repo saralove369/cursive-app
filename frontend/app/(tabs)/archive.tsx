@@ -16,8 +16,11 @@ import PaperBackground from '../../src/components/PaperBackground';
 import { colors, fonts, spacing, radius, shadow } from '../../src/theme';
 import { api, HistoricalDocument } from '../../src/lib/api';
 import { haptics } from '../../src/lib/haptics';
+import { manuscriptSource, MANUSCRIPT_ASSETS } from '../../src/lib/manuscript-assets';
 
-const HERO_IMG = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Letter_to_Cassandra_Austen%2C_by_Jane_Austen%2C_Bath%2C_12_May_1801_-_Morgan_Library_%26_Museum_-_New_York_City_-_DSC06587.jpg/1280px-Letter_to_Cassandra_Austen%2C_by_Jane_Austen%2C_Bath%2C_12_May_1801_-_Morgan_Library_%26_Museum_-_New_York_City_-_DSC06587.jpg';
+// The hero uses the same locally-bundled Jane Austen letter (jane-austen-cassandra.webp)
+// so the manuscript-room landing never depends on Wikimedia being up.
+const HERO_SOURCE = MANUSCRIPT_ASSETS['jane-austen-cassandra'];
 const FALLBACK_IMG = 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Emily_Dickinson_%22Wild_nights%22_manuscript.jpg/800px-Emily_Dickinson_%22Wild_nights%22_manuscript.jpg';
 
 export default function ArchiveScreen() {
@@ -45,7 +48,7 @@ export default function ArchiveScreen() {
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} testID="archive-screen">
           {/* Manuscript Room hero */}
           <View style={styles.heroWrap}>
-            <Image source={{ uri: HERO_IMG }} style={styles.heroImg} contentFit="cover" />
+            <Image source={HERO_SOURCE} style={styles.heroImg} contentFit="cover" />
             <LinearGradient
               colors={['rgba(15,13,10,0.10)', 'rgba(15,13,10,0.90)']}
               style={StyleSheet.absoluteFill}
@@ -85,7 +88,7 @@ export default function ArchiveScreen() {
                   {/* Facsimile preview — actual image of handwriting */}
                   <View style={styles.facsimileWrap}>
                     <Image
-                      source={{ uri: d.image_url || FALLBACK_IMG }}
+                      source={manuscriptSource(d.asset_key, d.image_url) ?? { uri: FALLBACK_IMG }}
                       style={styles.facsimileImg}
                       contentFit="cover"
                       transition={400}

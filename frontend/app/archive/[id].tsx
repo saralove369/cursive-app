@@ -32,6 +32,7 @@ import { colors, fonts, spacing, radius, shadow } from '../../src/theme';
 import { api, HistoricalDocument } from '../../src/lib/api';
 import { storage } from '../../src/lib/storage';
 import { haptics } from '../../src/lib/haptics';
+import { manuscriptSource } from '../../src/lib/manuscript-assets';
 
 const { width: WIN_W, height: WIN_H } = Dimensions.get('window');
 
@@ -122,7 +123,10 @@ export default function ArchiveDocScreen() {
     );
   }
 
-  const imgUrl = doc.image_url || FALLBACK_IMG;
+  // Prefer a locally-bundled manuscript when the doc has an asset_key; fall
+  // back to the remote image_url, then to a themed fallback URL.
+  const imgSource =
+    manuscriptSource(doc.asset_key, doc.image_url) ?? { uri: FALLBACK_IMG };
 
   return (
     <PaperBackground variant="parchment">
@@ -189,7 +193,7 @@ export default function ArchiveDocScreen() {
               style={styles.facsimile}
               testID="facsimile-image"
             >
-              <Image source={{ uri: imgUrl }} style={styles.facsimileImg} contentFit="cover" />
+              <Image source={imgSource} style={styles.facsimileImg} contentFit="cover" />
               <View style={styles.zoomBadge}>
                 <Maximize2 size={14} color={colors.bg.paper} strokeWidth={1.5} />
                 <Text style={styles.zoomBadgeText}>Tap to study</Text>
@@ -231,7 +235,7 @@ export default function ArchiveDocScreen() {
               }}
               style={styles.miniFacsimile}
             >
-              <Image source={{ uri: imgUrl }} style={styles.miniFacsimileImg} contentFit="cover" />
+              <Image source={imgSource} style={styles.miniFacsimileImg} contentFit="cover" />
               <LinearGradient
                 colors={['rgba(15,13,10,0.0)', 'rgba(15,13,10,0.45)']}
                 style={StyleSheet.absoluteFill}
@@ -276,7 +280,7 @@ export default function ArchiveDocScreen() {
                     setZoomOpen(true);
                   }}
                 >
-                  <Image source={{ uri: imgUrl }} style={styles.refImage} contentFit="cover" />
+                  <Image source={imgSource} style={styles.refImage} contentFit="cover" />
                 </TouchableOpacity>
                 <View style={styles.refTextWrap}>
                   <Text style={styles.refPassage} numberOfLines={4}>{doc.transcription}</Text>
@@ -294,7 +298,7 @@ export default function ArchiveDocScreen() {
                     setZoomOpen(true);
                   }}
                 >
-                  <Image source={{ uri: imgUrl }} style={styles.compareImage} contentFit="cover" />
+                  <Image source={imgSource} style={styles.compareImage} contentFit="cover" />
                   <View style={styles.zoomBadgeSmall}>
                     <Maximize2 size={12} color={colors.bg.paper} strokeWidth={1.5} />
                   </View>
@@ -380,7 +384,7 @@ export default function ArchiveDocScreen() {
             <Text style={styles.completeEyebrow}>The hand has rested</Text>
             <Text style={styles.completeTitle}>It is kept.</Text>
             <View style={styles.completeImageWrap}>
-              <Image source={{ uri: imgUrl }} style={styles.completeImage} contentFit="cover" />
+              <Image source={imgSource} style={styles.completeImage} contentFit="cover" />
             </View>
             <View style={styles.divider} />
             <Text style={styles.completeQuote}>{doc.transcription}</Text>
@@ -401,7 +405,7 @@ export default function ArchiveDocScreen() {
       {/* ZOOM MODAL */}
       <ZoomModal
         visible={zoomOpen}
-        imageUrl={imgUrl}
+        source={imgSource}
         title={doc.title}
         onClose={() => {
           haptics.tap();
@@ -415,12 +419,12 @@ export default function ArchiveDocScreen() {
 // ---------- ZoomModal ----------
 function ZoomModal({
   visible,
-  imageUrl,
+  source,
   title,
   onClose,
 }: {
   visible: boolean;
-  imageUrl: string;
+  source: import('react-native').ImageSourcePropType;
   title: string;
   onClose: () => void;
 }) {
@@ -487,7 +491,7 @@ function ZoomModal({
         <GestureHandlerRootView style={{ flex: 1 }}>
           <GestureDetector gesture={composed}>
             <Animated.View style={[zoomStyles.imageWrap, animatedStyle]}>
-              <Image source={{ uri: imageUrl }} style={zoomStyles.image} contentFit="contain" />
+              <Image source={source} style={zoomStyles.image} contentFit="contain" />
             </Animated.View>
           </GestureDetector>
         </GestureHandlerRootView>

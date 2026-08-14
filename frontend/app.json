@@ -12,14 +12,16 @@
       "supportsTablet": true,
       "infoPlist": {
         "UIBackgroundModes": []
-      }
+      },
+      "bundleIdentifier": "com.emergent.analogrestore.v7eanp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#F5F1E8"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.emergent.analogrestore.v7eanp"
     },
     "web": {
       "bundler": "metro",

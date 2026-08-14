@@ -47,7 +47,8 @@ class HistoricalDocument(BaseModel):
     era: str
     source: Optional[str] = None
     image_description: str  # description of what historical doc looks like
-    image_url: Optional[str] = None  # facsimile image
+    image_url: Optional[str] = None  # facsimile image (remote fallback)
+    asset_key: Optional[str] = None  # optional key for a locally-bundled image (see /frontend/src/lib/manuscript-assets.ts)
     archival_note: Optional[str] = None  # short note for the manuscript room
     location: Optional[str] = None  # where it was written / kept
 
@@ -401,6 +402,7 @@ CURATED_DOCUMENTS: List[Dict[str, Any]] = [
         "source": "Morgan Library & Museum, New York",
         "image_description": "Small folded sheet, even slightly forward-leaning hand, the lines tight and economical, the page near-full because paper was expensive and a sister's words were not.",
         "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Letter_to_Cassandra_Austen%2C_by_Jane_Austen%2C_Bath%2C_12_May_1801_-_Morgan_Library_%26_Museum_-_New_York_City_-_DSC06587.jpg/800px-Letter_to_Cassandra_Austen%2C_by_Jane_Austen%2C_Bath%2C_12_May_1801_-_Morgan_Library_%26_Museum_-_New_York_City_-_DSC06587.jpg",
+        "asset_key": "jane-austen-cassandra",
         "archival_note": "Austen's hand is the trained Italian hand of a gentlewoman of her generation — slender, slanted, with very little space between lines. To save paper, she occasionally 'crossed' her letters, writing a second page sideways across the first.",
         "location": "Bath, England",
     },
@@ -481,12 +483,17 @@ async def seed_content():
     # facsimiles are present; this is a small curated set so cost is negligible.
     existing_count = await db.historical_documents.count_documents({})
     existing_first = await db.historical_documents.find_one({}, {"_id": 0, "image_url": 1, "title": 1})
+    # Sample any doc that ought to have an asset_key to detect schema drift.
+    existing_austen = await db.historical_documents.find_one(
+        {"title": "Letter to Cassandra"}, {"_id": 0, "asset_key": 1}
+    )
     expected_first = CURATED_DOCUMENTS[0]
     needs_reseed = (
         existing_count != len(CURATED_DOCUMENTS)
         or not existing_first
         or existing_first.get("title") != expected_first["title"]
         or existing_first.get("image_url") != expected_first["image_url"]
+        or (existing_austen or {}).get("asset_key") != "jane-austen-cassandra"
     )
     if needs_reseed:
         await db.historical_documents.delete_many({})
