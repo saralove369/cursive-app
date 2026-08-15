@@ -103,12 +103,149 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Premium cognitive wellness mobile app called "Cursive" — handwriting studio with authentic
-  Palmer Method tracing, manuscript archive for studying real historical handwriting, and
-  cognitive writing sessions. Latest iteration: complete and refine ALL 26 uppercase letters
-  with authentic Palmer construction, replace all archive imagery with REAL public-domain
-  handwritten manuscript facsimiles, and redesign the archive flow as a 5-step manuscript
-  ritual (Observe → Study/Zoom → Read → Transcribe → Compare).
+  Premium cognitive wellness mobile app called "Codexia & Ink" (originally
+  branded "Cursive") — handwriting studio with authentic Palmer Method
+  tracing, and a manuscript archive of 13 real historical handwritten
+  documents from museum collections plus a small private family V-Mail
+  correspondence. Latest iteration: expand archive from 6 to 13 entries,
+  bundle every manuscript image locally so the archive works offline, wipe
+  invented transcriptions and replace them with a new "Study the Hand"
+  phase where the user deciphers the original manuscript themselves, and
+  rebrand app-wide from "Cursive" to "Codexia & Ink".
+
+backend:
+  - task: "Archive expanded to 13 authentic manuscripts with local asset_key + transcription_status schema"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: |
+          Added transcription_status ('verified' | 'study') and asset_key_secondary
+          fields to HistoricalDocument. Rewrote CURATED_DOCUMENTS with 13 entries:
+          Jane Austen (study), Emily Dickinson Wild Nights (verified — faithful
+          transcription preserving her dashes/line breaks/capitalization), Van
+          Gogh, Louis Noisette, Receipt Book, Frederick Douglass, Susan B.
+          Anthony (with 2nd page), Eadweard Muybridge, Deborah Haddock, Bridget
+          Hyde, V-Mail from Francis (with envelope 2nd page), Letter Home from
+          Lucille, Joseph Delaplaine — all 'study' mode except Dickinson.
+          Removed all previously-invented transcriptions per user rule.
+          Every entry carries an archival_credit with license attribution.
+          Reseed logic updated to detect schema drift (missing transcription_status).
+
+frontend:
+  - task: "15 manuscript images bundled locally (~10 MB total, all webp/jpg)"
+    implemented: true
+    working: true
+    file: "frontend/assets/manuscripts/ + frontend/src/lib/manuscript-assets.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: |
+          15 images bundled: 13 primary manuscript pages plus 2 secondary
+          pages (Anthony's 2nd page, Francis's V-Mail envelope). Registry now
+          exposes MANUSCRIPT_ASSETS keyed by stable slugs; manuscriptSource()
+          helper unchanged. No network dependency for archive imagery.
+
+  - task: "New 'Study the Hand' phase replaces Read when transcription_status='study'"
+    implemented: true
+    working: true
+    file: "frontend/app/archive/[id].tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: |
+          Phase II now toggles between 'Read' and 'Study the Hand' depending
+          on doc.transcription_status. Study mode shows 'TRANSCRIBE IT
+          YOURSELF' + a short instruction paragraph asking the user to
+          decipher the original. Verified transcription mode preserves the
+          typed transcription (used only for Dickinson Wild Nights, faithful
+          to manuscript dashes/line breaks). Both modes now render a
+          secondary facsimile when doc.asset_key_secondary is present
+          (Anthony page 2, V-Mail envelope). Archival credit block added
+          below Context. Screenshots verified: Dickinson shows the exact
+          poem with her dashes intact; Anthony shows two facsimiles + study
+          placeholder + full CC0 credit line.
+
+  - task: "App-wide rebrand: Cursive -> Codexia & Ink"
+    implemented: true
+    working: true
+    file: "frontend/app.json + onboarding.tsx + profile.tsx + SkiaGate.tsx + theme.ts + api.ts + haptics.ts"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: |
+          app.json display name changed; onboarding brand + first-slide
+          eyebrow updated; profile 'About' copy updated; SkiaGate fallback
+          text updated; comment headers in theme.ts, api.ts, haptics.ts
+          updated. iOS bundleIdentifier and Android package deliberately
+          left unchanged to preserve deployment identity. URL scheme
+          'cursive' left as-is to avoid breaking existing deep links.
+          Internal identifiers (CursiveLetter type, cursive-letters.ts
+          filename) also unchanged — code-level only.
+
+  - task: "Archive list card handles study-mode entries"
+    implemented: true
+    working: true
+    file: "frontend/app/(tabs)/archive.tsx"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: |
+          docExcerpt now shows 'Study the Hand · Transcribe it yourself.'
+          for entries where transcription is empty or transcription_status
+          is 'study'. 'X ENTRIES' counter continues to render dynamically —
+          verified showing '13 ENTRIES' in screenshot.
+
+metadata:
+  created_by: "main_agent"
+  version: "3.0"
+  test_sequence: 5
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "All 13 archive entries render correctly on iOS device (each has a bundled asset)"
+    - "Study the Hand phase for the 12 study-mode entries; verify TRANSCRIBE IT YOURSELF placeholder"
+    - "Read phase for Dickinson entry preserves faithful transcription with dashes intact"
+    - "Multi-page rendering (Anthony's 2 pages, V-Mail Francis's letter + envelope)"
+    - "Archival credit block appears below Context on every entry"
+    - "App bundle display name reads 'Codexia & Ink' on device home screen after next build"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    -agent: "main"
+    -message: |
+       Massive archive expansion done. 6 -> 13 entries. All bundled locally
+       (~10 MB total assets). New 'Study the Hand' phase replaces Read when
+       no verified transcription is available. Dickinson is the only entry
+       with a verified transcription and it faithfully preserves her dashes,
+       line breaks, and 'Chart —!' punctuation. All invented transcriptions
+       previously written for Van Gogh, Noisette, and Receipt Book have been
+       wiped per user rule. Family V-Mail entries use first names only
+       ('Francis', 'Lucille'). Rebrand 'Cursive' -> 'Codexia & Ink' applied
+       to all user-facing strings and app.json display name. iOS/Android
+       package identifiers left untouched to preserve deployment identity.
+       Screenshots verified Study mode (Anthony) and Read mode (Dickinson).
+       Ready to redeploy for Xcode/build.
 
 backend:
   - task: "Archive seeded with 6 authentic Wikimedia manuscript facsimiles (Dickinson, Austen, Van Gogh, Noisette, Wellcome Recipe, Dickinson Alabaster)"

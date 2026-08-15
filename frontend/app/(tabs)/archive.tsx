@@ -111,7 +111,9 @@ export default function ArchiveScreen() {
                       <Text style={styles.docSource}>{d.source}</Text>
                     ) : null}
                     <Text style={styles.docExcerpt} numberOfLines={2}>
-                      {d.transcription}
+                      {d.transcription_status === 'study' || !d.transcription
+                        ? 'Study the Hand · Transcribe it yourself.'
+                        : d.transcription}
                     </Text>
                     <View style={styles.docFooter}>
                       <Text style={styles.docCta}>Enter the room</Text>

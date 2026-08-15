@@ -157,7 +157,7 @@ export default function ProfileScreen() {
             <View style={styles.aboutCard}>
               <Info size={18} color={colors.accent.gold} strokeWidth={1.5} />
               <Text style={styles.aboutText}>
-                Cursive is a sanctuary for thoughtful people reclaiming focus, memory, and analog presence in an overstimulated world.
+                Codexia & Ink is a sanctuary for thoughtful people reclaiming focus, memory, and analog presence in an overstimulated world.
               </Text>
             </View>
 

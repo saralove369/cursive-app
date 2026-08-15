@@ -1,5 +1,5 @@
 /**
- * Cursive Design System
+ * Codexia & Ink Design System
  * Warm ivory paper · charcoal ink · muted gold
  */
 

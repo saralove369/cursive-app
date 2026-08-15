@@ -42,14 +42,17 @@ class ContentPiece(BaseModel):
 class HistoricalDocument(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
-    transcription: str
+    transcription: str = ""  # empty when transcription_status == 'study'
+    transcription_status: str = "verified"  # 'verified' | 'study' (user deciphers)
     context: str
     era: str
     source: Optional[str] = None
     image_description: str  # description of what historical doc looks like
     image_url: Optional[str] = None  # facsimile image (remote fallback)
     asset_key: Optional[str] = None  # optional key for a locally-bundled image (see /frontend/src/lib/manuscript-assets.ts)
+    asset_key_secondary: Optional[str] = None  # second page for multi-page manuscripts
     archival_note: Optional[str] = None  # short note for the manuscript room
+    archival_credit: Optional[str] = None  # full attribution + license line
     location: Optional[str] = None  # where it was written / kept
 
 
@@ -383,72 +386,547 @@ CURATED_CONTENT: List[Dict[str, Any]] = [
 ]
 
 CURATED_DOCUMENTS: List[Dict[str, Any]] = [
-    {
-        "title": "Wild Nights — Wild Nights!",
-        "transcription": "Wild nights — Wild nights! Were I with thee Wild nights should be Our luxury! Futile — the winds — To a heart in port — Done with the compass — Done with the chart!",
-        "context": "An autograph manuscript of one of Emily Dickinson's most quietly incendiary poems. She was thirty when she copied it onto folded sheets that she stitched into the small hand-sewn booklets — fascicles — in which she kept her work for herself.",
-        "era": "circa 1861",
-        "source": "Houghton Library, Harvard",
-        "image_description": "Folded letter-paper, soft violet-grey ink, dashes that pause the eye, the word 'Wild' lifting like a small flag at the top.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Emily_Dickinson_%22Wild_nights%22_manuscript.jpg/800px-Emily_Dickinson_%22Wild_nights%22_manuscript.jpg",
-        "archival_note": "Notice how the dashes are not punctuation but breath — short ones lean forward, long ones stretch the line. Dickinson punctuated by handwriting before she punctuated by grammar.",
-        "location": "Amherst, Massachusetts",
-    },
+    # ---- 01 · JANE AUSTEN --------------------------------------------------
     {
         "title": "Letter to Cassandra",
-        "transcription": "My dear Cassandra, I have received your letter, and I thank you for it. I am very glad you are returned safe from your journey; you have suffered, I am afraid, more than was needful. The weather here is fine. I hope it is the same with you.",
-        "context": "Jane Austen wrote nearly weekly to her elder sister Cassandra throughout her life. This letter, sent from Bath in May 1801, is part of the small surviving correspondence between them — Cassandra burned most of the rest after Jane's death, an act of editorial love whose loss the world has not quite forgiven.",
+        "transcription_status": "study",
+        "transcription": "",
+        "context": (
+            "Jane Austen wrote frequently to her elder sister Cassandra, her closest "
+            "confidante and one of the few people who knew the private Jane behind "
+            "the published novels. This letter was written from Bath in May 1801 "
+            "and belongs to the small group of surviving letters between the "
+            "sisters. Cassandra destroyed many of Jane's letters after her death, "
+            "leaving the surviving correspondence as a rare glimpse into Austen's "
+            "everyday voice and hand."
+        ),
         "era": "12 May 1801",
         "source": "Morgan Library & Museum, New York",
-        "image_description": "Small folded sheet, even slightly forward-leaning hand, the lines tight and economical, the page near-full because paper was expensive and a sister's words were not.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Letter_to_Cassandra_Austen%2C_by_Jane_Austen%2C_Bath%2C_12_May_1801_-_Morgan_Library_%26_Museum_-_New_York_City_-_DSC06587.jpg/800px-Letter_to_Cassandra_Austen%2C_by_Jane_Austen%2C_Bath%2C_12_May_1801_-_Morgan_Library_%26_Museum_-_New_York_City_-_DSC06587.jpg",
+        "image_description": (
+            "Folded sheet showing the address panel with wax seal on the left leaf "
+            "and the letter's opening — 'Paragon Tuesday May 12' — on the right. "
+            "Austen's small, forward-leaning Italian hand, brown iron-gall ink, "
+            "the paper's centre-fold visible."
+        ),
         "asset_key": "jane-austen-cassandra",
-        "archival_note": "Austen's hand is the trained Italian hand of a gentlewoman of her generation — slender, slanted, with very little space between lines. To save paper, she occasionally 'crossed' her letters, writing a second page sideways across the first.",
+        "archival_note": (
+            "Austen's hand is the trained Italian hand of a gentlewoman of her "
+            "generation — slender, slanted, with very little space between lines. "
+            "To save paper, she occasionally 'crossed' her letters, writing a "
+            "second page sideways across the first."
+        ),
+        "archival_credit": (
+            "Manuscript: Morgan Library & Museum, New York. "
+            "Digitized image: public-domain reproduction."
+        ),
         "location": "Bath, England",
     },
+
+    # ---- 02 · EMILY DICKINSON — Wild Nights! -------------------------------
     {
-        "title": "Letter from Arles",
-        "transcription": "My dear Bernard, I am writing to you from the Yellow House. The light here is unlike any light I have known. It is very hot. The cicadas sing all day long. I am painting wheatfields. Write to me.",
-        "context": "Vincent van Gogh wrote constantly to his friend Émile Bernard during his fevered Arles period of 1888. He used letters the way he used canvases — to test ideas, to ask, to be less alone. The transcription here is paraphrased from his April letter; the original is in his looping, urgent French.",
-        "era": "April 1888",
-        "source": "Morgan Library & Museum, New York",
-        "image_description": "A page densely written in a quick, slightly forward-leaning hand, the margins generous, occasional small thumbnail sketches drifting between the paragraphs.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Gogh_-_Autograph_letter_signed_Arles%2C_to_%C3%89mile_Bernard%2C_ca._1888_Apr._12%2C_MA_6441.3.jpg/800px-Gogh_-_Autograph_letter_signed_Arles%2C_to_%C3%89mile_Bernard%2C_ca._1888_Apr._12%2C_MA_6441.3.jpg",
-        "archival_note": "Watch how Van Gogh's letterforms speed up and slow down across the page — the lines bunch where he is excited, open where he is thinking. He drew while he wrote; his correspondence is a kind of sketchbook.",
-        "location": "Arles, Provence",
+        "title": "Wild Nights — Wild Nights!",
+        "transcription_status": "verified",
+        # Faithful transcription preserving Dickinson's own dashes, line breaks,
+        # capitalization and closing punctuation. Do NOT normalize.
+        "transcription": (
+            "\"Wild Nights — Wild Nights!\n"
+            "Were I with thee\n"
+            "Wild Nights should be\n"
+            "Our luxury!\n"
+            "\n"
+            "Futile — the Winds —\n"
+            "To a Heart in port —\n"
+            "Done with the Compass —\n"
+            "Done with the Chart —!\n"
+            "\n"
+            "Rowing in Eden —\n"
+            "Ah, the Sea!\n"
+            "Might I but moor —\n"
+            "Tonight —\n"
+            "In thee."
+        ),
+        "context": (
+            "Emily Dickinson copied Wild Nights — Wild Nights! into one of the "
+            "small handmade fascicles in which she preserved her poems. The "
+            "manuscript offers something a printed edition cannot: Dickinson's "
+            "own spacing, punctuation, dashes, line arrangement, and physical "
+            "relationship to the page. This is not simply a poem to read. It is "
+            "an opportunity to study the hand of one of America's most "
+            "distinctive poets."
+        ),
+        "era": "circa 1861",
+        "source": "Houghton Library, Harvard University",
+        "image_description": (
+            "Single leaf, three stanzas, Dickinson's characteristic long "
+            "dashes and slightly upward-drifting lines."
+        ),
+        "asset_key": "dickinson-wild-nights",
+        "archival_note": (
+            "Notice how the dashes are not punctuation but breath — short ones "
+            "lean forward, long ones stretch the line. Dickinson punctuated by "
+            "handwriting before she punctuated by grammar."
+        ),
+        "archival_credit": (
+            "Manuscript: Houghton Library, Harvard University. "
+            "Digitized image: public-domain reproduction. "
+            "Original poem/manuscript: Emily Dickinson."
+        ),
+        "location": "Amherst, Massachusetts",
     },
+
+    # ---- 03 · VINCENT VAN GOGH ---------------------------------------------
+    {
+        "title": "Letter to Émile Bernard",
+        "transcription_status": "study",
+        "transcription": "",
+        "context": (
+            "During his time in Arles, Vincent van Gogh wrote extensively to "
+            "fellow artist Émile Bernard. His letters were not merely personal "
+            "correspondence; they were a place where he worked through ideas "
+            "about painting, color, landscape, art, and friendship.\n\n"
+            "His handwriting is particularly fascinating to study because the "
+            "page carries the same sense of movement and energy that appears in "
+            "his drawings and paintings."
+        ),
+        "era": "19 April 1888",
+        "source": "Van Gogh Museum / archival correspondence",
+        "image_description": (
+            "A tall sheet of aging paper with a dense French cursive above and "
+            "below a small pen sketch of an orchard, the words 'Bleu', 'Blanc' "
+            "and 'Vert' inked directly into the drawing to note colours."
+        ),
+        "asset_key": "van-gogh-bernard",
+        "archival_note": (
+            "Watch how Van Gogh's letterforms speed up and slow down across the "
+            "page — the lines bunch where he is excited, open where he is "
+            "thinking. He drew while he wrote; his correspondence is a kind of "
+            "sketchbook."
+        ),
+        "archival_credit": (
+            "Original correspondence: Vincent van Gogh, letter to Émile Bernard, "
+            "19 April 1888, Arles. Public-domain reproduction."
+        ),
+        "location": "Arles, France",
+    },
+
+    # ---- 04 · LOUIS NOISETTE -----------------------------------------------
     {
         "title": "From a Botanist's Hand",
-        "transcription": "Monsieur, I send you herewith the seeds you requested. The Rosa noisettiana flowers most abundantly this season. Should you require cuttings of the new climber, write to me before the first frost.",
-        "context": "Louis Noisette was a celebrated nineteenth-century French nurseryman, the brother of the American breeder who gave the Noisette rose its name. His correspondence — meticulous, generous, full of soil and weather — survives in scattered archives, mostly in the Wellcome Collection and the libraries of the great botanical gardens.",
-        "era": "early 19th century",
-        "source": "Wellcome Collection",
-        "image_description": "Rich cream paper, copperplate hand with elegant looping ascenders, a signature that flourishes into a small drawn vine at the foot of the page.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Signed_autograph_letter_by_Louis_Noisette%2C_19th_c._Wellcome_L0075107.jpg/800px-Signed_autograph_letter_by_Louis_Noisette%2C_19th_c._Wellcome_L0075107.jpg",
-        "archival_note": "Botanists' letters are a small genre of their own — the handwriting tends to be precise (because plant names must be), but warm (because the writer is, almost without exception, in love with what they are writing about).",
-        "location": "Paris",
+        "transcription_status": "study",
+        "transcription": "",
+        "context": (
+            "Louis Claude Noisette (1772–1849) was a French botanist and "
+            "horticulturalist known for his work with roses and ornamental "
+            "plants. His surviving correspondence gives us an intimate glimpse "
+            "into the world of nineteenth-century horticulture: plants "
+            "exchanged between gardens, seeds and cuttings, cultivation, "
+            "seasons, and the practical knowledge passed between gardeners "
+            "and botanists.\n\n"
+            "This manuscript is especially beautiful as a handwriting study "
+            "because the subject matter itself belongs to the slow, "
+            "observational world of gardens."
+        ),
+        "era": "early 19th century (c. 1804–1820)",
+        "source": "Wellcome Collection, MS 7351/81",
+        "image_description": (
+            "Cream paper, short signed acknowledgement of receipt in French, "
+            "an expansive flourished 'L. Noisette' signature filling the "
+            "lower right of the sheet."
+        ),
+        "asset_key": "louis-noisette",
+        "archival_note": (
+            "Botanists' letters are a small genre of their own — the "
+            "handwriting tends to be precise (because plant names must be), "
+            "but warm (because the writer is, almost without exception, in "
+            "love with what they are writing about)."
+        ),
+        "archival_credit": (
+            "Manuscript: Wellcome Collection, MS 7351/81. "
+            "Image credit: Wellcome Collection / Wellcome Images. "
+            "License: CC BY 4.0."
+        ),
+        "location": "Paris, France",
     },
+
+    # ---- 05 · THE RECEIPT BOOK ---------------------------------------------
     {
         "title": "From a Receipt Book",
-        "transcription": "To make a fine raspberry cordial. Take of fresh raspberries two pounds, of fine sugar one pound. Crush in a stone jar and let stand four days, stirring once each morning. Strain through linen and bottle. It will keep all winter.",
-        "context": "An English household manuscript of culinary and medical 'receipts' — what we would now call recipes — kept and added to across generations. Such books often passed from mother to daughter and contain the small archaeology of a household: a cure for a cough, a stain remedy, a Christmas cake, a love-token sweet.",
-        "era": "circa 1700–1800",
-        "source": "Wellcome Collection",
-        "image_description": "Open page-spread of an old receipt book, multiple hands across the years, brown iron-gall ink that has bled gently into the soft handmade paper.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/English_culinary_and_medical_recipe_book_Wellcome_L0050232.jpg/800px-English_culinary_and_medical_recipe_book_Wellcome_L0050232.jpg",
-        "archival_note": "Observe the difference in hands — at least three women wrote in this book over fifty years. The earliest hand is the most flourished; the later ones plainer. Domestic handwriting tends, across generations, toward greater speed and less ornament.",
+        "transcription_status": "study",
+        "transcription": "",
+        "context": (
+            "Before 'recipe' became the standardized word we use today, "
+            "household instructions were commonly called receipts. This "
+            "manuscript collection contains recipes for preserving fruit, "
+            "making cordials, wines, syrups, medicines, and household "
+            "preparations, written by several different hands.\n\n"
+            "The pages preserve the practical knowledge of a household "
+            "across generations: what to preserve, what to cook, what to "
+            "distill, and what to keep for winter."
+        ),
+        "era": "circa 1690–1710",
+        "source": "Wellcome Collection, MS.4054",
+        "image_description": (
+            "Open two-page spread of a bound receipt book, 'Wine & Liquors' "
+            "at the head, recipes for Damsons Wine, White Mead, Hipocras, "
+            "Corints Wine and Braggat in a clear seventeenth-century hand."
+        ),
+        "asset_key": "receipt-book",
+        "archival_note": (
+            "Observe the difference in hands across the volume — at least "
+            "three women wrote in this book over fifty years. The earliest "
+            "hand is the most flourished; the later ones plainer. Domestic "
+            "handwriting tends, across generations, toward greater speed and "
+            "less ornament."
+        ),
+        "archival_credit": (
+            "Manuscript: Wellcome Collection, MS.4054. "
+            "Credit: Wellcome Collection. Rights: Public Domain Mark."
+        ),
         "location": "England",
     },
+
+    # ---- 06 · FREDERICK DOUGLASS -------------------------------------------
     {
-        "title": "Safe in their Alabaster Chambers",
-        "transcription": "Safe in their Alabaster Chambers — Untouched by Morning — And untouched by noon — Sleep the meek members of the Resurrection — Rafter of Satin and Roof of Stone.",
-        "context": "An autograph copy of one of Emily Dickinson's most-revised poems. She wrote at least five versions of these opening stanzas over a decade, sending different drafts to different correspondents and stitching her favoured version into Fascicle Six.",
-        "era": "1862",
-        "source": "Digital Commonwealth (Boston Public Library)",
-        "image_description": "Ivory paper, slim columnar lines, the long horizontal dashes Dickinson loved, an inkwell that runs slightly thin near the bottom of the page.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Emily_Dickinson%2C_Amherst%2C_Mass.%2C_autograph_manuscript_poem%2C_Safe_in_their_Alabaster_Chamber%2C_1862%2C_from_the_Digital_Commonwealth_-_1_commonwealth_kh04mv67t.jpg/800px-Emily_Dickinson%2C_Amherst%2C_Mass.%2C_autograph_manuscript_poem%2C_Safe_in_their_Alabaster_Chamber%2C_1862%2C_from_the_Digital_Commonwealth_-_1_commonwealth_kh04mv67t.jpg",
-        "archival_note": "Compare this hand with 'Wild nights' — five years apart, the same writer. The slant is steeper here, the dashes more emphatic. Handwriting is a slow self-portrait.",
-        "location": "Amherst, Massachusetts",
+        "title": "Letter from Frederick Douglass",
+        "transcription_status": "study",
+        "transcription": "",
+        "context": (
+            "Frederick Douglass wrote this letter to J. A. J. Creswell on "
+            "Freedman's Savings Bank letterhead in Washington, D.C., in 1874. "
+            "The document is a wonderful example of nineteenth-century "
+            "business correspondence: printed institutional letterhead "
+            "combined with an entirely personal handwritten body and "
+            "signature.\n\n"
+            "A small handwritten notation on the reverse reads "
+            "'Fredk. Douglass / July 3rd 74.' The page therefore preserves "
+            "not only Douglass's words, but his actual hand."
+        ),
+        "era": "3 July 1874",
+        "source": (
+            "National Museum of African American History and Culture, "
+            "Smithsonian Institution (Object 2021.58.2)"
+        ),
+        "image_description": (
+            "Cream lined stationery under an elaborate engraved letterhead "
+            "reading 'Principal Office of the Freedman's Savings and Trust "
+            "Company'. Address 'Hon. J.A.J. Creswell, Washington D.C.' at "
+            "top, the body in a confident nineteenth-century business hand, "
+            "closing 'Respectfully yours, Fredk. Douglass, Presdt.'"
+        ),
+        "asset_key": "frederick-douglass",
+        "archival_note": (
+            "Note the contrast between the ornate engraved letterhead and "
+            "the plain, direct hand beneath it — the aesthetics of "
+            "Reconstruction-era finance sitting above the aesthetics of a "
+            "man who preferred to say things plainly."
+        ),
+        "archival_credit": (
+            "Collection: National Museum of African American History and "
+            "Culture, Smithsonian Institution. Object 2021.58.2. "
+            "Rights: Public Domain / Smithsonian Open Access."
+        ),
+        "location": "Washington, D.C.",
+    },
+
+    # ---- 07 · SUSAN B. ANTHONY ---------------------------------------------
+    {
+        "title": "Letter from Susan B. Anthony",
+        "transcription_status": "study",
+        "transcription": "",
+        "context": (
+            "Susan B. Anthony wrote this letter in December 1880. Written in "
+            "ink on lined paper, it offers a quieter artifact of a woman "
+            "whose public life is usually represented through speeches, "
+            "photographs, and political history.\n\n"
+            "Here, the historical figure appears simply as a person writing "
+            "a letter by hand. The associated person in the museum record is "
+            "Elizabeth Cady Stanton, connecting the document to the "
+            "extraordinary network of women who worked together in the "
+            "nineteenth-century women's rights movement."
+        ),
+        "era": "20 December 1880",
+        "source": (
+            "National Portrait Gallery, Smithsonian Institution "
+            "(AD/NPG.77.49)"
+        ),
+        "image_description": (
+            "Two pages of lined paper. The first opens 'Tenafly N.J. Dec 20/80' "
+            "and is addressed to Armstrong & Co. The second closes "
+            "'Respectfully yours, Susan B. Anthony.' A vertical fold and the "
+            "faint impression of the reverse ink show through."
+        ),
+        "asset_key": "susan-b-anthony-1",
+        "asset_key_secondary": "susan-b-anthony-2",
+        "archival_note": (
+            "Anthony's hand is unfussy and direct — the writing of someone "
+            "used to correspondence as work. Compare the two pages: the "
+            "opening is measured; the closing, where her signature falls, "
+            "loosens."
+        ),
+        "archival_credit": (
+            "Collection: National Portrait Gallery, Smithsonian Institution. "
+            "Object AD/NPG.77.49. Medium: ink on lined paper. "
+            "Rights: CC0 / public domain."
+        ),
+        "location": "Tenafly, New Jersey",
+    },
+
+    # ---- 08 · EADWEARD MUYBRIDGE -------------------------------------------
+    {
+        "title": "Letter from Eadweard Muybridge",
+        "transcription_status": "study",
+        "transcription": "",
+        "context": (
+            "Eadweard Muybridge — famous for his pioneering photographic "
+            "studies of motion — wrote this two-page letter to the editor "
+            "of the Press in Philadelphia in 1887. The letterhead identifies "
+            "Muybridge with the University of Pennsylvania and the "
+            "correspondence discusses his photographic research and the "
+            "publication of his work.\n\n"
+            "The manuscript is particularly interesting because the writing "
+            "itself belongs to the era when photography, science, "
+            "publishing, and new technologies were rapidly changing how "
+            "people understood movement."
+        ),
+        "era": "24 November 1887",
+        "source": (
+            "National Museum of American History, Smithsonian Institution "
+            "(PG.001238)"
+        ),
+        "image_description": (
+            "Aged brown paper under Muybridge's engraved letterhead "
+            "'Eadweard Muybridge · University of Pennsylvania · "
+            "Philadelphia, U.S.A.' The word 'Confidential' is underlined "
+            "above the date; the body of the letter follows in a spidery, "
+            "slightly leftward-leaning hand."
+        ),
+        "asset_key": "eadweard-muybridge",
+        "archival_note": (
+            "Muybridge's hand tilts backward slightly — unusual for the "
+            "period. He was left-handed, which shows in the small pull of "
+            "the descenders and the direction of the finishing strokes."
+        ),
+        "archival_credit": (
+            "Collection: National Museum of American History, Smithsonian "
+            "Institution. Object PG.001238. "
+            "Rights: Public Domain / Smithsonian Open Access."
+        ),
+        "location": "Philadelphia, Pennsylvania",
+    },
+
+    # ---- 09 · DEBORAH HADDOCK ----------------------------------------------
+    {
+        "title": "Mrs. Deborah Haddock's Recipe Book",
+        "transcription_status": "study",
+        "transcription": "",
+        "context": (
+            "\"Mrs Deborah Haddock. Her Book December the 1 one thousand "
+            "Seven Hundred and twenty.\" So begins one of the most charming "
+            "objects in the Codexia archive.\n\n"
+            "Compiled beginning in 1720, Deborah Haddock's recipe book "
+            "contains culinary, medical, and household knowledge. Its pages "
+            "include soups, pies, puddings, cakes, biscuits, preserves, "
+            "household remedies, and other recipes gathered from a network "
+            "of women and men.\n\n"
+            "This exercise presents Deborah Haddock's Excellent Orange "
+            "Pudding — an ordinary domestic recipe preserved for more than "
+            "three centuries in the writer's own hand."
+        ),
+        "era": "1720 (early 18th century)",
+        "source": "Wellcome Collection, MS.7987",
+        "image_description": (
+            "A single receipt-book page, brown iron-gall ink on soft "
+            "handmade paper, the recipe headed 'To Meake an excelent ornge "
+            "pouding — Mrs Trepshe'."
+        ),
+        "asset_key": "deborah-haddock",
+        "archival_note": (
+            "Read the old spellings aloud rather than translating them in "
+            "your head — 'ornge', 'sugear', 'geather'. The book teaches "
+            "eighteenth-century English by ear as much as by eye."
+        ),
+        "archival_credit": (
+            "Manuscript: Wellcome Collection, MS.7987. Date: 1720 onward. "
+            "Credit: Wellcome Collection. Rights: Public Domain Mark. "
+            "The majority of culinary recipes are in Haddock's own hand."
+        ),
+        "location": "England",
+    },
+
+    # ---- 10 · BRIDGET HYDE -------------------------------------------------
+    {
+        "title": "Bridget Hyde's Receipt Book",
+        "transcription_status": "study",
+        "transcription": "",
+        "context": (
+            "\"Madam Bridget Hyde her receipt book August the 19th Anno "
+            "Domini 1676.\"\n\n"
+            "Bridget Hyde's receipt book is a remarkable record of domestic "
+            "knowledge from the late seventeenth century. The volume "
+            "contains recipes for cooking, preserves, wines, cakes, "
+            "puddings, cordials, household preparations, and medical "
+            "remedies, with entries continuing through 1690.\n\n"
+            "This exercise presents a page containing marmalade of cherries, "
+            "Martinmasse beef, and a rare jelly — three wonderfully strange "
+            "fragments of seventeenth-century household life preserved "
+            "together on one handwritten page. The spelling belongs to the "
+            "period and is preserved rather than silently modernized."
+        ),
+        "era": "19 August 1676",
+        "source": "Wellcome Collection, MS.2990",
+        "image_description": (
+            "A single leaf headed 'To Make rough Marmalet of Cherries', "
+            "followed by 'To Make Martinmasse Beefe' and 'To Make a rare "
+            "Jelley', in a graceful late-seventeenth-century hand with "
+            "flourished capitals."
+        ),
+        "asset_key": "bridget-hyde",
+        "archival_note": (
+            "What looks like 'Marsinmajse' is Martinmasse — a reference to "
+            "Martinmas, 11 November, the traditional slaughter-day. Let the "
+            "manuscript teach the old spelling rather than 'correcting' it."
+        ),
+        "archival_credit": (
+            "Manuscript: Wellcome Collection, MS.2990. Dates: 1676–1690. "
+            "Credit: Wellcome Collection. Rights: Public Domain Mark."
+        ),
+        "location": "England",
+    },
+
+    # ---- 11 · FRANCIS — V-MAIL FROM OVERSEAS -------------------------------
+    {
+        "title": "A V-Mail from Overseas",
+        "transcription_status": "study",
+        "transcription": "",
+        "context": (
+            "A V-Mail written by a soldier named Francis to his mother and "
+            "sisters in Iowa in the closing winter of the Second World War.\n\n"
+            "V-Mail (Victory Mail) was a wartime correspondence system in "
+            "which soldiers' handwritten letters were photographed onto "
+            "microfilm, shipped home, and then reprinted at reduced size "
+            "for delivery. The system saved cargo space and speeded "
+            "delivery — at the cost of shrinking the writer's hand to a "
+            "small, spidery version of itself.\n\n"
+            "The letter carries the ordinary weather of ordinary people "
+            "writing through an extraordinary time: seasickness, boat food, "
+            "a brother in hospital, the box of cookies that never arrived, "
+            "and the plainest possible closing — 'Good Luck. Love to all. "
+            "Francis.'"
+        ),
+        "era": "23 December 1944",
+        "source": "Private family collection",
+        "image_description": (
+            "A reduced V-Mail print showing the wartime microfilm frame in "
+            "full — censor's stamp, addresses, a full page of upright "
+            "American cursive, and the printed 'REPLY BY V-MAIL' bar along "
+            "the foot."
+        ),
+        "asset_key": "vmail-francis-letter",
+        "asset_key_secondary": "vmail-francis-envelope",
+        "archival_note": (
+            "V-Mail handwriting is a genre of its own — the writer knew the "
+            "page would be shrunk, so most V-Mail is written slightly larger "
+            "and more carefully than an ordinary letter. Watch how Francis "
+            "keeps his lines even despite writing on a moving ship."
+        ),
+        "archival_credit": (
+            "Source: Private family collection. Original physical V-Mail "
+            "retained by the family. Digitized for Codexia & Ink with "
+            "family permission."
+        ),
+        "location": "aboard ship, en route overseas",
+    },
+
+    # ---- 12 · LUCILLE — LETTER HOME ---------------------------------------
+    {
+        "title": "A Letter Home",
+        "transcription_status": "study",
+        "transcription": "",
+        "context": (
+            "A letter written from Iowa in early January 1945 by Francis's "
+            "sister, Lucille, in reply to two V-Mails she had just received "
+            "from him overseas.\n\n"
+            "Where Francis's V-Mail is compressed by wartime microfilm, "
+            "Lucille's letter is the ordinary thing itself: notebook paper, "
+            "blue ink, a hole-punched margin, an easy round hand. She writes "
+            "about the weather, the family car, whether they've missed "
+            "school, the butchering of a beef, the pink teddy bear Floyd "
+            "sent Pat for Christmas.\n\n"
+            "Read alongside her brother's letter, the two documents become "
+            "a tiny conversation across time and distance. The handwriting "
+            "is not famous. The writers were not historical celebrities. "
+            "That is precisely why it matters. This is what an ordinary "
+            "American family sounded like on paper in the winter of 1944–45."
+        ),
+        "era": "7 January 1945",
+        "source": "Private family collection",
+        "image_description": (
+            "A folded page of lined notebook paper opening 'Dear Francis, "
+            "Received your two v.mail letters Sat Jan 6.' A relaxed round "
+            "American cursive in dark blue ink."
+        ),
+        "asset_key": "vmail-lucille-reply",
+        "archival_note": (
+            "The hand is easy, unhurried, and completely un-self-conscious "
+            "— the writing of someone who is used to writing letters. Watch "
+            "the small habitual quirks: the way she draws the date, the "
+            "capital D at the start of names, the plain full-stops."
+        ),
+        "archival_credit": (
+            "Source: Private family collection. Original artifact retained "
+            "by the family. Digitized for Codexia & Ink with family "
+            "permission."
+        ),
+        "location": "Burlington, Iowa",
+    },
+
+    # ---- 13 · JOSEPH DELAPLAINE --------------------------------------------
+    {
+        "title": "Letter to Jacob Rapelye",
+        "transcription_status": "study",
+        "transcription": "",
+        "context": (
+            "Joseph Delaplaine (1777–1824) was an American artist, "
+            "publisher, and portraitist active in Philadelphia during the "
+            "early nineteenth century. This handwritten letter was written "
+            "to Jacob Rapelye on December 26, 1811, in Philadelphia.\n\n"
+            "Unlike the famous literary manuscripts in the archive, this "
+            "document is a quieter example of everyday correspondence from "
+            "the early Republic. Its value is in the hand itself: the ink, "
+            "paper, spacing, letterforms, and physical rhythm of a person "
+            "writing more than two centuries ago.\n\n"
+            "The letter gives us an opportunity to encounter handwriting "
+            "not as a reproduction of a printed text, but as an artifact of "
+            "a particular person, place, and moment."
+        ),
+        "era": "26 December 1811",
+        "source": (
+            "National Portrait Gallery, Smithsonian Institution "
+            "(AD/NPG.79.14)"
+        ),
+        "image_description": (
+            "A single sheet of laid paper, opening 'Philada Decr 26 1811 · "
+            "Dear Sir', a fluent early-Republic hand with generous "
+            "flourishes on the capitals, closing with a large signature "
+            "'Joseph Delaplaine' and a smaller line 'Mr Jacob Rapelye' "
+            "below."
+        ),
+        "asset_key": "joseph-delaplaine",
+        "archival_note": (
+            "Delaplaine's hand is a study in confident everyday "
+            "penmanship of the early Republic — quick round bodies on the "
+            "lowercase, dramatic descending loops on the y and g, the D of "
+            "the signature nearly ornamental. This is what a working "
+            "American of 1811 looked like on paper when he was writing "
+            "to a friend."
+        ),
+        "archival_credit": (
+            "Collection: National Portrait Gallery, Smithsonian "
+            "Institution. Object AD/NPG.79.14. Author: Joseph Delaplaine. "
+            "Addressee: Jacob Rapelye. Medium: ink on paper. "
+            "Rights: CC0 / Public Domain."
+        ),
+        "location": "Philadelphia, Pennsylvania",
     },
 ]
 
@@ -479,21 +957,23 @@ async def seed_content():
             await db.content_library.insert_one(doc)
         logging.info(f"Seeded {len(CURATED_CONTENT)} content pieces.")
 
-    # Always re-seed historical documents to ensure latest authentic Wikimedia
-    # facsimiles are present; this is a small curated set so cost is negligible.
+    # Always re-seed historical documents to ensure latest authentic
+    # manuscript facsimiles are present. This is a small curated set so cost
+    # is negligible. We reseed whenever the count changes, whenever the first
+    # document's identity drifts, or whenever a document is missing the
+    # `transcription_status` field (indicating a schema migration).
     existing_count = await db.historical_documents.count_documents({})
-    existing_first = await db.historical_documents.find_one({}, {"_id": 0, "image_url": 1, "title": 1})
-    # Sample any doc that ought to have an asset_key to detect schema drift.
-    existing_austen = await db.historical_documents.find_one(
-        {"title": "Letter to Cassandra"}, {"_id": 0, "asset_key": 1}
+    existing_first = await db.historical_documents.find_one({}, {"_id": 0, "title": 1, "asset_key": 1})
+    existing_missing_status = await db.historical_documents.find_one(
+        {"transcription_status": {"$exists": False}}, {"_id": 0, "title": 1}
     )
     expected_first = CURATED_DOCUMENTS[0]
     needs_reseed = (
         existing_count != len(CURATED_DOCUMENTS)
         or not existing_first
         or existing_first.get("title") != expected_first["title"]
-        or existing_first.get("image_url") != expected_first["image_url"]
-        or (existing_austen or {}).get("asset_key") != "jane-austen-cassandra"
+        or existing_first.get("asset_key") != expected_first.get("asset_key")
+        or existing_missing_status is not None
     )
     if needs_reseed:
         await db.historical_documents.delete_many({})

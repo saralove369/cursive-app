@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 
 /**
- * Subtle, paper-like haptic vocabulary for Cursive.
+ * Subtle, paper-like haptic vocabulary for Codexia & Ink.
  * Avoids buzzy, gamified vibrations.
  */
 export const haptics = {

@@ -128,6 +128,12 @@ export default function ArchiveDocScreen() {
   const imgSource =
     manuscriptSource(doc.asset_key, doc.image_url) ?? { uri: FALLBACK_IMG };
 
+  // Some manuscripts are presented as handwriting-deciphering exercises. When
+  // `transcription_status` is 'study', the app displays the "Study the Hand"
+  // phase instead of a typed transcription — the user must decode the page
+  // themselves.
+  const isStudyMode = doc.transcription_status === 'study';
+
   return (
     <PaperBackground variant="parchment">
       <SafeAreaView style={styles.safe} edges={['top']}>
@@ -150,7 +156,7 @@ export default function ArchiveDocScreen() {
               {phase === 'observe'
                 ? '· I · Observe'
                 : phase === 'read'
-                ? '· II · Read'
+                ? (isStudyMode ? '· II · Study the Hand' : '· II · Read')
                 : phase === 'transcribe'
                 ? '· III · Transcribe'
                 : phase === 'compare'
@@ -215,12 +221,14 @@ export default function ArchiveDocScreen() {
               onPress={goRead}
               testID="goto-read"
             >
-              <Text style={styles.beginText}>Read the transcription</Text>
+              <Text style={styles.beginText}>
+                {isStudyMode ? 'Study the hand' : 'Read the transcription'}
+              </Text>
             </TouchableOpacity>
           </ScrollView>
         )}
 
-        {/* PHASE 2 — READ */}
+        {/* PHASE 2 — READ (or STUDY THE HAND) */}
         {phase === 'read' && (
           <ScrollView contentContainerStyle={styles.readScroll} showsVerticalScrollIndicator={false}>
             <Text style={styles.title}>{doc.title}</Text>
@@ -243,13 +251,58 @@ export default function ArchiveDocScreen() {
               <Text style={styles.miniLabel}>The original</Text>
             </TouchableOpacity>
 
+            {/* Optional secondary page — e.g. envelope, second sheet */}
+            {doc.asset_key_secondary ? (
+              <TouchableOpacity
+                activeOpacity={0.92}
+                onPress={() => {
+                  haptics.tap();
+                  setZoomOpen(true);
+                }}
+                style={[styles.miniFacsimile, { marginTop: spacing.md }]}
+              >
+                <Image
+                  source={manuscriptSource(doc.asset_key_secondary, null) ?? imgSource}
+                  style={styles.miniFacsimileImg}
+                  contentFit="cover"
+                />
+                <LinearGradient
+                  colors={['rgba(15,13,10,0.0)', 'rgba(15,13,10,0.45)']}
+                  style={StyleSheet.absoluteFill}
+                />
+                <Text style={styles.miniLabel}>Second page</Text>
+              </TouchableOpacity>
+            ) : null}
+
             <View style={styles.divider} />
-            <Text style={styles.transcriptionEyebrow}>Transcription</Text>
-            <Text style={styles.transcriptionBody}>{doc.transcription}</Text>
+
+            {isStudyMode ? (
+              <>
+                <Text style={styles.transcriptionEyebrow}>Transcribe it yourself</Text>
+                <Text style={[styles.transcriptionBody, styles.studyBody]}>
+                  This manuscript is presented without a typed transcription. Look at the original carefully. What do you think it says?{'\n\n'}
+                  Zoom in. Follow the line of the pen. Read aloud if it helps.{'\n\n'}
+                  When you're ready, transcribe the passage in your own hand on the next page.
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.transcriptionEyebrow}>Transcription</Text>
+                <Text style={styles.transcriptionBody}>{doc.transcription}</Text>
+              </>
+            )}
 
             <View style={styles.divider} />
             <Text style={styles.contextEyebrow}>Context</Text>
             <Text style={styles.contextBody}>{doc.context}</Text>
+
+            {doc.archival_credit ? (
+              <>
+                <View style={styles.divider} />
+                <Text style={styles.contextEyebrow}>Archival credit</Text>
+                <Text style={styles.creditBody}>{doc.archival_credit}</Text>
+              </>
+            ) : null}
 
             <TouchableOpacity
               style={styles.beginBtn}
@@ -692,6 +745,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     color: colors.text.secondary,
+  },
+  studyBody: {
+    fontStyle: 'italic',
+  },
+  creditBody: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    lineHeight: 20,
+    color: colors.text.muted,
+    letterSpacing: 0.2,
   },
 
   beginBtn: {

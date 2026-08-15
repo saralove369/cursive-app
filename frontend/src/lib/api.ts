@@ -1,5 +1,5 @@
 /**
- * API client for Cursive backend.
+ * API client for Codexia & Ink backend.
  */
 
 const BASE = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -42,13 +42,16 @@ export interface HistoricalDocument {
   id: string;
   title: string;
   transcription: string;
+  transcription_status?: 'verified' | 'study';
   context: string;
   era: string;
   source?: string | null;
   image_description: string;
   image_url?: string | null;
   asset_key?: string | null;
+  asset_key_secondary?: string | null;
   archival_note?: string | null;
+  archival_credit?: string | null;
   location?: string | null;
 }
 

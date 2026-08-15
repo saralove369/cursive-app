@@ -23,7 +23,7 @@ const { width: W, height: H } = Dimensions.get('window');
 
 const SLIDES = [
   {
-    eyebrow: 'CURSIVE',
+    eyebrow: 'CODEXIA & INK',
     title: 'A sanctuary for\ndeep thought.',
     body:
       'In a world of endless feeds, this is a quieter room — one where the hand remembers what the mind forgets, and attention finds its way home.',
@@ -122,7 +122,7 @@ export default function Onboarding() {
 
       <SafeAreaView style={styles.overlay} pointerEvents="box-none">
         <View style={styles.topRow}>
-          <Text style={styles.brand}>Cursive</Text>
+          <Text style={styles.brand}>Codexia & Ink</Text>
           <TouchableOpacity onPress={skip} hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }} testID="onboarding-skip">
             <Text style={styles.skip}>Skip</Text>
           </TouchableOpacity>

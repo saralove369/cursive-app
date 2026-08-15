@@ -40,7 +40,7 @@ export default function SkiaGate({ children }: Props) {
       <View style={styles.box}>
         <Text style={styles.errorEyebrow}>The canvas is unavailable here</Text>
         <Text style={styles.errorBody}>
-          The handwriting surface requires a touch device. Please open Cursive on your phone or tablet for the full ritual.
+          The handwriting surface requires a touch device. Please open Codexia & Ink on your phone or tablet for the full ritual.
         </Text>
       </View>
     );
